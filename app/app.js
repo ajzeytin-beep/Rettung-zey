@@ -44,7 +44,8 @@
   /* ---------- Speicher (nur auf diesem Gerät) ---------- */
   var KEY = "rettung-zey-v1";
   function fresh() {
-    return { srs: {}, cases: {}, streak: { last: null, count: 0 }, stats: { answered: 0, correct: 0 }, exams: [], size: "normal" };
+    return { srs: {}, cases: {}, streak: { last: null, count: 0 }, stats: { answered: 0, correct: 0 }, exams: [], size: "normal",
+      levels: { faelle: 1, medis: 1, akronyme: 1, orga: 1 } };
   }
   function load() {
     try {
@@ -64,10 +65,14 @@
 
   /* ---------- Fragenpool ---------- */
   var AREAS = {
+    faelle: { name: "Fallbeispiele", route: "faelle" },
     medis: { name: "Medikamente", route: "medikamente" },
     akronyme: { name: "Akronyme", route: "akronyme" },
     orga: { name: "Organisation", route: "organisation" }
   };
+  var STUFEN = { 1: "Grundlagen", 2: "Fortgeschritten", 3: "Profi" };
+  /* Ab diesem Fach der Lernkartei gilt eine Frage als sicher (zweimal hintereinander richtig) */
+  var SICHER = 2;
 
   function list(items) {
     return "<ul>" + items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
@@ -103,10 +108,13 @@
       qs.push({ id: "m-amp-" + m.id, bereich: "medis", typ: "mc", frage: "Wie liegt " + m.name + " im Rettungsdienst üblicherweise vor?",
         korrekt: m.darreichung, pool: uniq(D.medis.filter(function (o) { return o.id !== m.id; }).map(function (o) { return o.darreichung; })),
         erklaerung: m.name + ": " + m.darreichung + ". " + m.vorbereitung[0] });
+      qs.push({ id: "m-amprev-" + m.id, stufe: 2, bereich: "medis", typ: "mc", frage: "Welches Medikament liegt so vor: " + m.darreichung + "?",
+        korrekt: m.name, pool: D.medis.filter(function (o) { return o.id !== m.id; }).map(function (o) { return o.name; }),
+        erklaerung: m.name + ": " + m.darreichung + "." });
       var hn = norm(m.handel);
       var verraet = m.namen.some(function (n) { return hn.indexOf(norm(n)) !== -1; });
       if (m.handel && !verraet && !/^z\. ?b\./i.test(m.handel) && !/^isoton/i.test(m.handel)) {
-        qs.push({ id: "m-han-" + m.id, bereich: "medis", typ: "text", frage: "Welcher Wirkstoff steckt in " + m.handel + "?",
+        qs.push({ id: "m-han-" + m.id, stufe: 2, bereich: "medis", typ: "text", frage: "Welcher Wirkstoff steckt in " + m.handel + "?",
           antworten: m.namen, loesung: m.name, erklaerung: m.handel + " enthält " + m.name + "." });
       }
     });
@@ -121,6 +129,11 @@
           items: a.teile.map(function (t) { return t[1]; }),
           erklaerung: a.teile.map(function (t) { return t[0]; }).join(" – ") });
       }
+      var keys = a.teile ? a.teile.map(function (t) { return t[0]; }) : [];
+      if (a.teile && a.teile.length >= 3 && uniq(keys).length === keys.length && ["qsofa", "schockindex"].indexOf(a.id) === -1) {
+        qs.push({ id: "a-teil-" + a.id, stufe: 2, bereich: "akronyme", typ: "mc", teilVon: a,
+          frage: "Einzelne Teile von " + a.kurz, erklaerung: a.teile.map(function (t) { return t[0] + " = " + t[1]; }).join(" · ") });
+      }
       if (!a.teile) {
         qs.push({ id: "a-txt-" + a.id, bereich: "akronyme", typ: "text", frage: "Wie lautet die Abkürzung für „" + a.lang + "“?",
           antworten: [a.kurz], loesung: a.kurz, erklaerung: a.kurz + " = " + a.lang });
@@ -128,8 +141,10 @@
     });
 
     D.fragen.forEach(function (q) { qs.push(q); });
+    qs.forEach(function (q) { q.stufe = q.stufe || 1; });
     return qs;
   }
+  D.faelle.forEach(function (f) { f.stufe = f.stufe || 1; });
   var BANK = buildBank();
   var BY_ID = {};
   BANK.forEach(function (q) { BY_ID[q.id] = q; });
@@ -148,11 +163,42 @@
     if (result === 2) S.stats.correct++;
     save();
   }
-  function mastery(area) {
-    var qs = BANK.filter(function (q) { return q.bereich === area; });
-    var sum = 0;
-    qs.forEach(function (q) { var r = S.srs[q.id]; if (r) sum += Math.min(r.box, 4); });
-    return qs.length ? sum / (qs.length * 4) : 0;
+  /* ---------- Stufen ---------- */
+  function maxLevel(area) {
+    var src = area === "faelle" ? D.faelle : BANK.filter(function (q) { return q.bereich === area; });
+    return src.reduce(function (m, x) { return Math.max(m, x.stufe); }, 1);
+  }
+  function level(area) { return Math.min((S.levels && S.levels[area]) || 1, maxLevel(area)); }
+  function unlocked(q) { return q.stufe <= level(q.bereich); }
+  function levelItems(area, lvl) {
+    var src = area === "faelle" ? D.faelle : BANK.filter(function (q) { return q.bereich === area; });
+    return src.filter(function (x) { return x.stufe === lvl; });
+  }
+  function isSafe(area, x) {
+    if (area === "faelle") return !!(S.cases[x.id] && S.cases[x.id].best >= 1);
+    var r = S.srs[x.id];
+    return !!(r && r.box >= SICHER);
+  }
+  function levelProgress(area, lvl) {
+    var items = levelItems(area, lvl);
+    return items.length ? items.filter(function (x) { return isSafe(area, x); }).length / items.length : 0;
+  }
+  function levelOpen(area) {
+    var lvl = level(area);
+    return levelItems(area, lvl).filter(function (x) { return !isSafe(area, x); }).length;
+  }
+  /* Schaltet die nächste Stufe frei, sobald die aktuelle zu 100 % sitzt. Einmal freigeschaltet bleibt freigeschaltet. */
+  function checkLevelUps() {
+    var ups = [];
+    S.levels = S.levels || {};
+    Object.keys(AREAS).forEach(function (a) {
+      while (level(a) < maxLevel(a) && levelProgress(a, level(a)) >= 1) {
+        S.levels[a] = level(a) + 1;
+        ups.push({ area: a, level: S.levels[a] });
+      }
+    });
+    if (ups.length) save();
+    return ups;
   }
   function isDue(q) { var r = S.srs[q.id]; return r && r.due <= today(); }
   function isNew(q) { return !S.srs[q.id]; }
@@ -171,13 +217,22 @@
     return g;
   }
   /* Fällige zuerst (schwächste vorne), dann neue gemischt über die Bereiche, dann die am wenigsten sicheren */
-  function pickSet(filter, n) {
-    var pool = BANK.filter(filter);
+  function prioritize(pool) {
     var due = shuffle(pool.filter(isDue)).sort(function (a, b) { return S.srs[a.id].box - S.srs[b.id].box; });
     var neu = interleave(byArea(shuffle(pool.filter(isNew))));
     var rest = shuffle(pool.filter(function (q) { return !isDue(q) && !isNew(q); }))
       .sort(function (a, b) { return S.srs[a.id].box - S.srs[b.id].box; });
-    return shuffle(due.concat(neu, rest).slice(0, n));
+    return due.concat(neu, rest);
+  }
+  /* Fragen der aktuellen Stufe, dazu ca. 30 % Wiederholung aus geschafften Stufen */
+  function pickSet(filter, n) {
+    var pool = BANK.filter(function (q) { return unlocked(q) && filter(q); });
+    var cur = prioritize(pool.filter(function (q) { return q.stufe === level(q.bereich); }));
+    var old = prioritize(pool.filter(function (q) { return q.stufe < level(q.bereich); }));
+    var k = Math.min(old.length, Math.round(n * 0.3));
+    var picked = old.slice(0, k).concat(cur.slice(0, n - k));
+    if (picked.length < n) picked = picked.concat(old.slice(k, k + n - picked.length));
+    return shuffle(picked);
   }
 
   function touchStreak() {
@@ -281,8 +336,18 @@
 
   /* ---------- Quiz-Engine ---------- */
   function instantiate(q) {
-    var inst = { q: q };
-    if (q.typ === "mc" && q.pool) {
+    var inst = { q: q, frage: q.frage };
+    if (q.teilVon) {
+      var a = q.teilVon, t = a.teile[Math.floor(Math.random() * a.teile.length)];
+      var same = a.teile.filter(function (x) { return x !== t; }).map(function (x) { return x[1]; });
+      var fremd = [];
+      D.akronyme.forEach(function (o) { if (o.id !== a.id && o.teile) o.teile.forEach(function (x) { fremd.push(x[1]); }); });
+      var distr = sample(same, 3);
+      if (distr.length < 3) distr = distr.concat(sample(fremd, 3 - distr.length));
+      inst.frage = a.kurz + ": Wofür steht „" + t[0] + "“?";
+      inst.options = shuffle([t[1]].concat(distr));
+      inst.correct = [inst.options.indexOf(t[1])];
+    } else if (q.typ === "mc" && q.pool) {
       var wrong = sample(q.pool.filter(function (x) { return x !== q.korrekt; }), 3);
       inst.options = shuffle([q.korrekt].concat(wrong));
       inst.correct = [inst.options.indexOf(q.korrekt)];
@@ -347,7 +412,9 @@
         "</div>" +
         (opts.header ? opts.header(inst, i) : "") +
         '<section class="panel q-card" aria-live="polite">' +
-        (q.bereich && AREAS[q.bereich] ? '<div><span class="chip">' + esc(AREAS[q.bereich].name) + "</span></div>" : "") +
+        (q.bereich && AREAS[q.bereich] ? '<div class="btn-row" style="gap:6px"><span class="chip">' + esc(AREAS[q.bereich].name) + "</span>" +
+          (q.stufe > 1 ? '<span class="chip red">Stufe ' + q.stufe + "</span>" : "") +
+          (q.stufe < level(q.bereich) ? '<span class="chip ok">Wiederholung</span>' : "") + "</div>" : "") +
         body(inst) +
         '<div id="q-feedback"></div>' +
         "</section></div>";
@@ -370,7 +437,7 @@
           (q.vorneSub ? '<p class="muted">' + esc(q.vorneSub) + "</p>" : "") + "</div></div>" +
           '<button class="btn block" type="button" data-act="flip">Karte umdrehen</button>';
       }
-      var h = '<p class="q-text">' + esc(q.frage) + "</p>";
+      var h = '<p class="q-text">' + esc(inst.frage) + "</p>";
       if (q.typ === "mc" || q.typ === "multi") {
         if (q.typ === "multi") h += '<p class="q-hint">Mehrere Antworten können richtig sein.</p>';
         h += '<div class="options">' + inst.options.map(function (o, k) {
@@ -541,6 +608,10 @@
       var total = mode === "exam" ? items.length : answered;
       var score = total ? right / total : 0;
       var extra = opts.onFinish ? opts.onFinish({ right: right, total: total, score: score, results: results }) : "";
+      checkLevelUps().forEach(function (u) {
+        extra += '<div class="levelup"><p class="label">Neue Stufe freigeschaltet</p><h3>' + esc(AREAS[u.area].name) + " · Stufe " + u.level + " " + esc(STUFEN[u.level] || "") + "</h3>" +
+          '<p class="muted">Ab jetzt kommen schwerere Fragen. Was du schon kannst, wird weiter wiederholt.</p></div>';
+      });
       var wrong = results.filter(function (r) { return !r.ok; });
       var r = 54, c = 2 * Math.PI * r;
       var color = score >= 0.8 ? "var(--ok)" : score >= 0.5 ? "var(--warn)" : "var(--red)";
@@ -584,23 +655,40 @@
   }
 
   /* ---------- Seiten ---------- */
-  function areaCard(route, title, sub, value, okBar) {
-    return '<a class="area" href="#' + route + '"><span class="area-icon">' + icon(route, 24) + "</span>" +
-      "<h3>" + esc(title) + "</h3>" +
-      '<div class="area-meta"><div class="bar' + (okBar ? " ok" : "") + '"><i style="width:' + pct(value) + '%"></i></div><span class="num">' + esc(sub) + "</span></div></a>";
+  function levelInfo(area) {
+    var lvl = level(area), max = maxLevel(area), p = levelProgress(area, lvl);
+    return { lvl: lvl, max: max, p: p, done: lvl === max && p >= 1, open: levelOpen(area) };
   }
 
-  function caseStats() {
-    var done = D.faelle.filter(function (f) { return S.cases[f.id] && S.cases[f.id].best >= 0.8; }).length;
-    return { done: done, total: D.faelle.length };
+  function areaCard(area, title) {
+    var li = levelInfo(area), route = AREAS[area].route;
+    return '<a class="area" href="#' + route + '"><span class="area-icon">' + icon(route, 24) + "</span>" +
+      '<div class="area-title"><h3>' + esc(title) + '</h3><span class="lvl">' + (li.done ? "Alle Stufen" : "Stufe " + li.lvl + "/" + li.max) + "</span></div>" +
+      '<div class="area-meta"><div class="bar' + (li.done ? " ok" : "") + '"><i style="width:' + pct(li.p) + '%"></i></div><span class="num">' + pct(li.p) + " %</span></div></a>";
+  }
+
+  function levelPanel(area) {
+    var li = levelInfo(area);
+    var unit = area === "faelle" ? (li.open === 1 ? "Fall" : "Fälle") : (li.open === 1 ? "Frage" : "Fragen");
+    return '<section class="panel level-panel">' +
+      '<div class="level-head"><div><p class="label">Deine Stufe</p><h3>Stufe ' + li.lvl + " · " + esc(STUFEN[li.lvl] || "") + "</h3></div>" +
+      '<div class="steps" aria-label="Stufe ' + li.lvl + " von " + li.max + '">' +
+      Array.apply(null, Array(li.max)).map(function (_, k) {
+        return '<span class="' + (k + 1 < li.lvl || li.done ? "on" : k + 1 === li.lvl ? "cur" : "") + '"></span>';
+      }).join("") + "</div></div>" +
+      '<div class="area-meta"><div class="bar' + (li.done ? " ok" : "") + '"><i style="width:' + pct(li.p) + '%"></i></div><span class="num">' + pct(li.p) + " %</span></div>" +
+      '<p class="muted">' + (li.done
+        ? "Alle Stufen geschafft. Die Wiederholungen halten dein Wissen frisch."
+        : li.lvl < li.max
+          ? "Noch " + li.open + " " + unit + " bis Stufe " + (li.lvl + 1) + ". " + (area === "faelle" ? "Ein Fall zählt, wenn du ihn mit 100 % abschließt." : "Eine Frage sitzt, wenn du sie zweimal hintereinander richtig beantwortest.")
+          : "Letzte Stufe. Noch " + li.open + " " + unit + " bis 100 %.") + "</p></section>";
   }
 
   var PAGES = {};
 
   PAGES.start = function () {
     var dueN = BANK.filter(isDue).length;
-    var newN = BANK.filter(isNew).length;
-    var cs = caseStats();
+    var newN = BANK.filter(function (q) { return isNew(q) && unlocked(q); }).length;
     var acc = S.stats.answered ? pct(S.stats.correct / S.stats.answered) + " %" : "–";
     var weak = BANK.filter(function (q) { var r = S.srs[q.id]; return r && r.wrong > 0 && r.box < 3; })
       .sort(function (a, b) { return S.srs[b.id].wrong - S.srs[a.id].wrong; }).slice(0, 5);
@@ -632,11 +720,13 @@
         "</div>" +
       "</div>" +
       '<section style="display:grid;gap:12px"><p class="label">Dein Fortschritt</p><div class="areas">' +
-        areaCard("faelle", "Fallbeispiele", cs.done + " / " + cs.total, cs.total ? cs.done / cs.total : 0, true) +
-        areaCard("medikamente", "Medikamente", pct(mastery("medis")) + " %", mastery("medis")) +
-        areaCard("akronyme", "Akronyme & Schemata", pct(mastery("akronyme")) + " %", mastery("akronyme")) +
-        areaCard("organisation", "Organisation & Übergabe", pct(mastery("orga")) + " %", mastery("orga")) +
-      "</div></section>" +
+        areaCard("faelle", "Fallbeispiele") +
+        areaCard("medis", "Medikamente") +
+        areaCard("akronyme", "Akronyme & Schemata") +
+        areaCard("orga", "Organisation & Übergabe") +
+      "</div>" +
+      '<p class="footer-note">Jeder Bereich hat 3 Stufen: Grundlagen, Fortgeschritten und Profi. Sitzt eine Stufe zu 100 %, wird die nächste freigeschaltet. Geschaffte Fragen kommen weiter als Wiederholung dran.</p>' +
+      "</section>" +
       '<section class="panel" style="display:grid;gap:12px"><p class="label">Schwachstellen</p>' +
         (weak.length
           ? '<ul class="weak-list">' + weak.map(function (q) {
@@ -670,18 +760,31 @@
   };
 
   PAGES.faelle = function () {
+    var cur = level("faelle"), groups = "";
+    for (var lvl = 1; lvl <= maxLevel("faelle"); lvl++) {
+      var fs = levelItems("faelle", lvl);
+      groups += '<section class="case-level"><div class="case-level-head"><h2>Stufe ' + lvl + " · " + esc(STUFEN[lvl] || "") + "</h2>" +
+        (lvl > cur ? '<span class="chip">Gesperrt</span>' : '<span class="chip ' + (levelProgress("faelle", lvl) >= 1 ? "ok" : "warn") + '">' +
+          fs.filter(function (f) { return isSafe("faelle", f); }).length + " / " + fs.length + " mit 100 %</span>") + "</div>";
+      if (lvl > cur) {
+        groups += '<div class="locked">' + fs.length + " neue Fälle warten. Schließe alle Fälle der Stufe " + (lvl - 1) + " mit 100 % ab, um sie freizuschalten.</div>";
+      } else {
+        groups += '<div class="case-grid">' + fs.map(function (f) {
+          var c = S.cases[f.id];
+          return '<button class="case-card" type="button" data-case="' + f.id + '">' +
+            '<span class="stw">' + esc(f.meldung.stichwort) + "</span>" +
+            "<h3>" + esc(f.titel) + "</h3>" +
+            '<div class="row"><span class="chip">' + esc(f.thema) + '</span><span class="chip">' + f.schritte.length + " Schritte</span>" +
+            (c ? '<span class="chip ' + (c.best >= 1 ? "ok" : "warn") + '">Bestwert ' + pct(c.best) + " %</span>" : '<span class="chip red">Neu</span>') +
+            "</div></button>";
+        }).join("") + "</div>";
+      }
+      groups += "</section>";
+    }
     show(
       '<div class="page-head"><p class="label">Fallbeispiele</p><h1>Einsätze durchspielen</h1>' +
-      "<p>Schritt für Schritt nach cABCDE. Zu jeder Entscheidung bekommst du sofort eine Rückmeldung. Ein Fall gilt ab 80 % als sicher.</p></div>" +
-      '<div class="case-grid">' + D.faelle.map(function (f) {
-        var c = S.cases[f.id];
-        return '<button class="case-card" type="button" data-case="' + f.id + '">' +
-          '<span class="stw">' + esc(f.meldung.stichwort) + "</span>" +
-          "<h3>" + esc(f.titel) + "</h3>" +
-          '<div class="row"><span class="chip">' + esc(f.thema) + '</span><span class="chip">' + f.schritte.length + " Schritte</span>" +
-          (c ? '<span class="chip ' + (c.best >= 0.8 ? "ok" : "warn") + '">Bestwert ' + pct(c.best) + " %</span>" : '<span class="chip red">Neu</span>') +
-          "</div></button>";
-      }).join("") + "</div>",
+      "<p>Schritt für Schritt nach cABCDE. Zu jeder Entscheidung bekommst du sofort eine Rückmeldung.</p></div>" +
+      levelPanel("faelle") + groups,
       "Fallbeispiele"
     );
     view.querySelectorAll("[data-case]").forEach(function (b) {
@@ -729,6 +832,7 @@
     var active = "Alle", term = "";
     show(
       '<div class="page-head"><p class="label">' + esc(cfg.eyebrow) + "</p><h1>" + esc(cfg.h1) + "</h1><p>" + esc(cfg.intro) + "</p></div>" +
+      levelPanel(cfg.area) +
       '<div class="btn-row">' + cfg.actions.map(function (a, k) {
         return '<button class="btn' + (k ? " secondary" : "") + '" type="button" data-action="' + k + '">' + esc(a.label) + "</button>";
       }).join("") + "</div>" +
@@ -767,7 +871,7 @@
 
   PAGES.medikamente = function () {
     searchablePage({
-      id: "med", title: "Medikamente", eyebrow: "Medikamente", h1: "Medikamente kennen und vorbereiten",
+      id: "med", area: "medis", title: "Medikamente", eyebrow: "Medikamente", h1: "Medikamente kennen und vorbereiten",
       intro: "Steckbriefe mit Indikation, Kontraindikationen, Dosierung und dem, was du beim Aufziehen wissen musst.",
       placeholder: "Wirkstoff, Handelsname oder Indikation suchen",
       items: D.medis,
@@ -798,7 +902,7 @@
 
   PAGES.akronyme = function () {
     searchablePage({
-      id: "acro", title: "Akronyme", eyebrow: "Akronyme & Schemata", h1: "Merkhilfen sicher abrufen",
+      id: "acro", area: "akronyme", title: "Akronyme", eyebrow: "Akronyme & Schemata", h1: "Merkhilfen sicher abrufen",
       intro: "Schemata für Untersuchung, Übergabe und Einsatztaktik und die wichtigsten Abkürzungen aus dem Rettungsdienst.",
       placeholder: "Abkürzung oder Begriff suchen",
       items: D.akronyme,
@@ -839,6 +943,7 @@
     show(
       '<div class="page-head"><p class="label">Organisation & Übergabe</p><h1>Einsatz führen bis NA oder RTW kommt</h1>' +
       "<p>Ersteintreffend handeln, Patienten richtig einschätzen, sauber übergeben. Erst lesen, dann üben.</p></div>" +
+      levelPanel("orga") +
       '<div class="btn-row">' +
         '<button class="btn" type="button" id="orga-quiz">Quiz starten</button>' +
         '<button class="btn secondary" type="button" id="orga-krit">Kritisch oder nicht?</button>' +
@@ -857,12 +962,12 @@
       runQuiz(shuffle(BANK.filter(function (q) { return /^q-o-krit/.test(q.id); })), { title: "Kritisch oder nicht?" });
     });
     document.getElementById("orga-order").addEventListener("click", function () {
-      runQuiz(shuffle(BANK.filter(function (q) { return q.bereich === "orga" && q.typ === "order"; })), { title: "Abläufe sortieren" });
+      runQuiz(pickSet(function (q) { return q.bereich === "orga" && q.typ === "order"; }, 10), { title: "Abläufe sortieren" });
     });
   };
 
   function examSet(n) {
-    var pool = BANK.filter(function (q) { return q.typ !== "card"; });
+    var pool = BANK.filter(function (q) { return q.typ !== "card" && unlocked(q); });
     var g = byArea(shuffle(pool));
     var out = [], keys = ["orga", "medis", "akronyme"], k = 0;
     while (out.length < n && keys.some(function (x) { return g[x] && g[x].length; })) {

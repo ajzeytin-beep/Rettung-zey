@@ -573,3 +573,39 @@ button { font: inherit; color: inherit; }
 .history { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .history li { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .history li:last-child { border-bottom: 0; }
+
+/* ---------- Stufen ---------- */
+.area-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.lvl {
+  flex: none;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.level-panel { display: grid; gap: 12px; }
+.level-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.steps { display: flex; gap: 6px; }
+.steps span { width: 28px; height: 8px; border-radius: 99px; background: var(--panel-2); border: 1px solid var(--line); }
+.steps span.on { background: var(--ok); border-color: var(--ok); }
+.steps span.cur { background: var(--red); border-color: var(--red); }
+.case-level { display: grid; gap: 12px; }
+.case-level-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.locked {
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+.levelup {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--red-tint);
+  border: 1px solid #4a1b20;
+}
+.levelup h3 { color: #fff; }
