@@ -1,0 +1,47 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rettung-zey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Lernplattform für Rettungssanitäter: Fallbeispiele, Medikamente, Akronyme und Einsatzorganisation.">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+
+<header class="topbar">
+  <button class="icon-btn" id="menu-open" type="button" aria-label="Menü öffnen" aria-controls="drawer" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+  </button>
+  <a class="brand" href="#start" aria-label="Zur Startseite">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Rettung-zey</span>
+  </a>
+  <span class="topbar-title" id="topbar-title"></span>
+  <span class="streak-chip" id="streak-chip" title="Lernserie in Tagen"></span>
+</header>
+
+<div class="scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="Hauptmenü" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand-name">Rettung-zey</span>
+    <button class="icon-btn" id="menu-close" type="button" aria-label="Menü schließen">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+    </button>
+  </div>
+  <ul class="nav-list" id="nav-list"></ul>
+  <div class="drawer-section">
+    <p class="label">Schriftgröße</p>
+    <div class="seg" id="font-size" role="group" aria-label="Schriftgröße">
+      <button type="button" data-size="normal">A</button>
+      <button type="button" data-size="gross">A+</button>
+      <button type="button" data-size="sehrgross">A++</button>
+    </div>
+  </div>
+  <p class="drawer-note">Lernhilfe. Verbindlich sind die SOPs des Rettungsdienstes Landkreis Aurich und die Anweisungen des Notarztes.</p>
+</nav>
+
+<main id="view" class="view" tabindex="-1"></main>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
