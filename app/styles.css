@@ -95,14 +95,8 @@ button { font: inherit; color: inherit; }
 }
 .icon-btn:hover { background: var(--panel-2); }
 .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
-.brand-mark {
-  width: 22px; height: 22px; flex: none;
-  background:
-    linear-gradient(var(--red), var(--red)) center / 100% 34% no-repeat,
-    linear-gradient(var(--red), var(--red)) center / 34% 100% no-repeat;
-  border-radius: 3px;
-}
-.brand-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; letter-spacing: 0.02em; }
+.brand-mark { width: 40px; height: 24px; flex: none; display: block; }
+.brand-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; letter-spacing: 0.06em; white-space: nowrap; }
 .topbar-title {
   margin-left: auto;
   font-family: var(--display);
