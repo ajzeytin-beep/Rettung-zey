@@ -12,10 +12,25 @@ Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite
 - **EKG:** 19 präklinisch wichtige Rhythmen als berechnete Streifen plus EKG-Trainer
 - **Medikamente:** 44 Wirkstoffe, die 18 aus der Lernsession sind markiert
 - **Fallbeispiele:** 52 Fälle, davon 16 typische N-KTW-Einsätze aus Niedersachsen/Ostfriesland, zum schrittweisen Aufdecken (Internistik, Trauma, Neuro, Psychiatrie, Pädiatrie, Geburt, MANV, Recht), Filter und Zufallsfall
+- **Übergabe-Trainer:** Übergabe nach SINNHAFT schreiben, App prüft Vollständigkeit und Zahlen
+- **Protokoll-Übung:** vereinfachtes Einsatzprotokoll zu einem Fall ausfüllen und mit der Musterlösung vergleichen
 - **Rechner:** GCS, Schockindex, qSOFA, NEWS2, Kinder-Notfalldosen
 - **Akronyme:** 40 Merkschemata und Abkürzungen (SINNHAFT, SAMPLERS, AVPU, xABCDE, 4 H/HITS, NRettDG, NPsychKG …) mit Karten und Quiz
 
 Der Fortschritt wird nur lokal im Browser gespeichert (`localStorage`).
+
+## Als App aufs Handy (PWA)
+
+Die App ist eine installierbare Web-App mit Offline-Speicher (`manifest.webmanifest`, `sw.js`, `icons/`).
+Dafür muss sie über **https** erreichbar sein, z. B. mit GitHub Pages:
+
+1. Repository → **Settings → Pages**
+2. *Source*: **Deploy from a branch**, Branch `claude/rettsan-plus-lernapp` (bzw. `main`), Ordner `/ (root)` → **Save**
+3. Nach 1–2 Minuten ist die App unter `https://<benutzername>.github.io/Rettung-zey/` erreichbar.
+4. Auf dem Handy öffnen → iPhone: Safari → Teilen → „Zum Home-Bildschirm“; Android: Chrome → Menü → „App installieren“.
+
+Hinweis: GitHub Pages für **private** Repositories braucht GitHub Pro. Alternativ das Repository öffentlich stellen
+oder den Ordner bei einem anderen statischen Hoster hochladen. Nach Änderungen an den Dateien `VERSION` in `sw.js` erhöhen.
 
 ## Starten
 

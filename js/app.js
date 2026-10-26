@@ -27,7 +27,9 @@
     pruefung: '<path d="M8 3h8l3 3v15H5V3z"/><path d="M9 12l2 2 4-4"/>',
     ziel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
     zurueck: '<path d="M15 18l-6-6 6-6"/>',
-    stat: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
+    stat: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    training: '<path d="M9 3h6v3H9z"/><path d="M7 4.5H5V21h14V4.5h-2"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',
+    install: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 19h14"/>'
   };
   function ico(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + I[n] + '</svg>'; }
   var RTW = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.6" width="4" height="1.4" rx=".5" fill="#fff"/>' +
@@ -129,10 +131,10 @@
   var NAV = [
     ['start', 'Start', 'start'], ['lernen', 'Lernmodule', 'lernen'], ['karten', 'Karteikarten', 'karten'],
     ['quiz', 'Quiz & Prüfung', 'quiz'], ['akronyme', 'Akronyme', 'abc'], ['ekg', 'EKG-Rhythmen', 'ekg'], ['medis', 'Medikamente', 'medis'],
-    ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner']
+    ['faelle', 'Fallbeispiele', 'faelle'], ['training', 'Übergabe & Protokoll', 'training'], ['rechner', 'Rechner & Scores', 'rechner']
   ];
   var TABS = [['start', 'Start', 'start'], ['lernen', 'Lernen', 'lernen'], ['karten', 'Karten', 'karten'], ['quiz', 'Quiz', 'quiz'], ['mehr', 'Mehr', 'mehr']];
-  var BEREICH = { modul: 'lernen', medi: 'medis', fall: 'faelle', ekgtrainer: 'ekg', pruefung: 'quiz', schwaechen: 'quiz', statistik: 'start' };
+  var BEREICH = { modul: 'lernen', medi: 'medis', fall: 'faelle', ekgtrainer: 'ekg', pruefung: 'quiz', schwaechen: 'quiz', statistik: 'start', uebergabe: 'training', protokoll: 'training' };
 
   function gehe(token) { if (location.hash.slice(1) === token) render(); else location.hash = token; }
   window.addEventListener('hashchange', function () { render(); window.scrollTo(0, 0); });
@@ -148,6 +150,7 @@
     $('#app').innerHTML =
       '<div class="app">' +
         '<aside class="sidebar">' + MARKE + nav +
+        '<button class="nav-link" data-gehe="installieren" data-nav="installieren">' + ico('install') + '<span>Als App installieren</span></button>' +
         '<div class="sidebar-foot">Lernhilfe – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und der Notarzt.</div></aside>' +
         '<header class="topbar">' + MARKE + '</header>' +
         '<main class="main"><div class="inhalt" id="view"></div></main>' +
@@ -163,7 +166,7 @@
     var bereich = BEREICH[name] || name;
     document.querySelectorAll('[data-nav]').forEach(function (b) {
       var n = b.getAttribute('data-nav');
-      var aktiv = n === bereich || (n === 'mehr' && ['ekg', 'medis', 'faelle', 'rechner', 'akronyme', 'mehr'].indexOf(bereich) >= 0 && b.closest('.bottomnav'));
+      var aktiv = n === bereich || (n === 'mehr' && ['ekg', 'medis', 'faelle', 'rechner', 'akronyme', 'training', 'installieren', 'mehr'].indexOf(bereich) >= 0 && b.closest('.bottomnav'));
       b.classList.toggle('aktiv', !!aktiv);
     });
     var v = $('#view');
@@ -617,7 +620,7 @@
           '<section class="feld stapel"><span class="label">Verdachtsdiagnose</span><h2>' + esc(f.diagnose) + '</h2>' +
             (f.fehler.length ? '<div class="stapel" style="gap:6px"><span class="label">Typische Fehler</span><ul class="punkte">' + f.fehler.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div>' : '') +
             (f.uebergabe ? '<div class="feld-2 stapel"><span class="label">Muster-Übergabe (SINNHAFT)</span><p class="uebergabe">' + md(f.uebergabe) + '</p></div>' : '') +
-            '<div class="reihe"><button class="btn" id="naechsterFall">Nächster Fall</button><button class="btn zweit" id="neuStart">Neu beginnen</button></div></section>' : '');
+            '<div class="reihe"><button class="btn" id="naechsterFall">Nächster Fall</button><button class="btn zweit" data-gehe="uebergabe-' + f.id + '">' + ico('training') + 'Übergabe üben</button><button class="btn zweit" data-gehe="protokoll-' + f.id + '">Protokoll schreiben</button><button class="btn zweit" id="neuStart">Neu beginnen</button></div></section>' : '');
       var a = $('#aufdecken');
       if (a) a.onclick = function () { offen++; if (offen >= f.schritte.length) { S.faelle[f.id] = { done: Date.now() }; heuteZaehlen('faelle'); speichern(); } zeichne(); };
       if ($('#naechsterFall')) {
@@ -760,10 +763,165 @@
     liste();
   };
 
+
+  // ---------- Übergabe-Trainer & Protokoll ----------
+  var TRAININGSFAELLE = RS.faelle.filter(function (f) { return Object.keys(f.werte).length >= 3; });
+  var WERTNAMEN = { AF: 'Atemfrequenz', SpO2: 'SpO₂', HF: 'Puls', RR: 'Blutdruck', BZ: 'Blutzucker', Temp: 'Temperatur', GCS: 'GCS', AVPU: 'AVPU', NRS: 'Schmerz (NRS)' };
+  function wertName(k) { return WERTNAMEN[k] || k.replace('SpO2', 'SpO₂'); }
+  function zahlen(wert) { return (String(wert).match(/\d+(?:[.,]\d+)?/g) || []); }
+  function enthaeltZahl(text, z) {
+    var varianten = [z, z.replace(',', '.'), z.replace('.', ',')];
+    return varianten.some(function (v) { return new RegExp('(^|[^\\d.,])' + v.replace('.', '\\.') + '(?!\\d|[.,]\\d)').test(text); });
+  }
+  function patientInfo(f) {
+    var m = f.lage.match(/(\d+)[- ](?:jährige|Jährige|jähriger|jährigen|Jahre)/) || f.lage.match(/(\d+) Monate/);
+    var g = /Frau|Mädchen|Patientin|Bewohnerin|Urlauberin|Seniorin/.test(f.lage) ? 'weiblich' : /Mann|Junge|Landwirt|Fischer|Urlauber|Motorradfahrer|Radfahrer/.test(f.lage) ? 'männlich' : '';
+    return { alter: m ? m[1] : '', geschlecht: g };
+  }
+  function trainingFall(arg) {
+    return RS.faelle.find(function (f) { return f.id === arg; }) || TRAININGSFAELLE[Math.floor(Math.random() * TRAININGSFAELLE.length)];
+  }
+  function lageBox(f) {
+    var w = Object.keys(f.werte);
+    return '<section class="feld stapel"><div class="reihe" style="justify-content:space-between"><span class="label">' + esc(f.kat) + ' · ' + esc(f.titel) + '</span><button class="btn zweit klein" id="andererFall">Anderer Fall</button></div><p>' + md(f.lage) + '</p>' +
+      (w.length ? '<div class="werte">' + w.map(function (k) { return '<div class="wert"><span>' + esc(wertName(k)) + '</span><b>' + esc(f.werte[k]) + '</b></div>'; }).join('') + '</div>' : '') + '</section>';
+  }
+  function pruefZeile(ok, text, hinweis) {
+    var farbe = ok === null ? '--muted' : ok ? '--ok' : '--red-hi';
+    return '<div class="akr-zeile"><span class="akr-b" style="color:var(' + farbe + ')">' + (ok === null ? '–' : ok ? '✓' : '✗') + '</span><span>' + text + (hinweis ? '<span class="muted"> – ' + hinweis + '</span>' : '') + '</span></div>';
+  }
+
+  var SINNHAFT_CHECKS = [
+    ['S', 'Sicherstellen („Alle mal herhören“)', /herhören|hands ?off|alle mal|aufmerksamkeit|zuhören|kurz ruhe/],
+    ['I', 'Identifikation (Alter, Geschlecht)', /\d+\s*(jahre|jährig|j\.|monate)/],
+    ['N', 'Notfallereignis (was, wann)', /\b(seit|vor)\b|gestürzt|aufgefunden|plötzlich|beim |nach (einem|dem)|ereignis/],
+    ['N', 'Notfallpriorität (ABCDE mit Werten)', /atemweg|\b[abcde][ :]|atmung|kreislauf|neurolog|bewusst/],
+    ['H', 'Handlung (Maßnahmen)', /zugang|pvk|sauerstoff|\bo2\b|o₂|gegeben|gelagert|lagerung|immobil|schien|verband|tourniquet|monitoring|12-kanal|vakuum|wärmeerhalt|maßnahme/],
+    ['A', 'Anamnese (SAMPLER)', /allergi|medikament|vorerkrank|dauermedikation|anamnese|marcumar|eliquis|insulin|nimmt /],
+    ['F', 'Fazit (Verdacht, Zielklinik)', /verdacht|v\. ?a\.|fazit|zielklinik|klinik|angemeldet|voranmeld/],
+    ['T', 'Teamfrage', /fragen\s*\?|noch fragen|gibt es fragen/]
+  ];
+  function musterUebergabe(f) {
+    if (f.uebergabe) return f.uebergabe;
+    var p = patientInfo(f), w = f.werte;
+    var vit = Object.keys(w).map(function (k) { return wertName(k) + ' ' + w[k]; }).join(', ');
+    return '„Alle mal herhören. Patient' + (p.geschlecht === 'weiblich' ? 'in' : '') + (p.alter ? ', ' + p.alter + ' Jahre' : '') + '. ' +
+      f.lage.split('. ').slice(0, 2).join('. ').replace(/\.$/, '') + '. ABCDE: ' + vit + '. Maßnahmen: [deine Maßnahmen und ihre Wirkung]. Anamnese: [Allergien, Medikamente, Vorerkrankungen]. Fazit: Verdacht auf ' + f.diagnose + ', Ziel [passende Klinik]. Gibt es noch Fragen?“';
+  }
+
+  VIEWS.training = function (v) {
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Für die Praxis</span><h1>Übergabe & Protokoll</h1><p class="muted">Üben, was im Einsatz am häufigsten schiefgeht: vollständige Übergaben und saubere Dokumentation.</p></div></div>' +
+      '<section class="raster-2">' +
+        '<div class="feld stapel"><h2>Übergabe-Trainer</h2><p class="muted">Du bekommst einen Fall mit Vitalwerten und formulierst die Übergabe nach SINNHAFT. Die App prüft, ob alle Punkte drin sind und ob deine Zahlen stimmen.</p>' +
+          '<p class="hinweis">Tipp: Am Handy kannst du über das Mikrofon der Tastatur diktieren.</p><button class="btn" data-gehe="uebergabe" style="align-self:flex-start">' + ico('training') + 'Übergabe üben</button></div>' +
+        '<div class="feld stapel"><h2>Einsatzprotokoll</h2><p class="muted">Du füllst ein vereinfachtes Protokoll zu einem Fall aus: Erstbefund, Verdachtsdiagnose, Maßnahmen, NACA, Transportziel. Danach vergleichst du mit der Musterlösung.</p>' +
+          '<button class="btn" data-gehe="protokoll" style="align-self:flex-start">' + ico('faelle') + 'Protokoll schreiben</button></div>' +
+      '</section>';
+  };
+
+  VIEWS.uebergabe = function (v, arg) {
+    var f = trainingFall(arg), entwurf = '';
+    function zeichne(ergebnis) {
+      v.innerHTML = zurueck('training', 'Übergabe & Protokoll') + '<div class="stapel" style="gap:4px"><span class="label">Übergabe-Trainer</span><h1>Übergib den Patienten</h1></div>' + lageBox(f) +
+        '<section class="feld stapel"><label class="label" for="uetext">Deine Übergabe nach SINNHAFT</label>' +
+        '<textarea id="uetext" class="eingabe" rows="9" placeholder="„Alle mal herhören. Patient männlich, 58 Jahre …“">' + esc(entwurf) + '</textarea>' +
+        '<div class="reihe"><button class="btn" id="pruefen">Übergabe prüfen</button><span class="muted" style="font-size:.85rem">Fehlende Angaben (Maßnahmen, Anamnese) darfst du sinnvoll ergänzen.</span></div></section>' +
+        (ergebnis || '');
+      $('#pruefen').onclick = pruefen;
+      $('#uetext').oninput = function () { entwurf = this.value; };
+      $('#andererFall').onclick = function () { gehe('uebergabe-' + trainingFall().id); };
+    }
+    function pruefen() {
+      var t = entwurf.toLowerCase();
+      if (t.trim().length < 20) { toast('Schreib zuerst deine Übergabe'); return; }
+      var punkte = SINNHAFT_CHECKS.map(function (c) { return [c[0], c[1], c[2].test(t)]; });
+      var extra = [['Atemfrequenz genannt', /atemfrequenz|\baf\b/.test(t)], ['EKG-Befund genannt', /ekg|rhythmus|sinus|st-heb/.test(t)]];
+      var werte = Object.keys(f.werte).filter(function (k) { return zahlen(f.werte[k]).length; }).map(function (k) {
+        return [wertName(k) + ' ' + f.werte[k], zahlen(f.werte[k]).every(function (x) { return enthaeltZahl(t, x); })];
+      });
+      var alle = punkte.map(function (p) { return p[2]; }).concat(extra.map(function (e) { return e[1]; }), werte.map(function (w) { return w[1]; }));
+      var score = pct(alle.filter(Boolean).length, alle.length);
+      zeichne('<section class="raster-2"><div class="feld stapel"><span class="label">Ergebnis</span><div class="ergebnis-zahl">' + score + ' %</div>' +
+        '<div class="akr-zeilen">' + punkte.map(function (p) { return pruefZeile(p[2], '<strong>' + p[0] + '</strong> ' + esc(p[1])); }).join('') + extra.map(function (e) { return pruefZeile(e[1], esc(e[0])); }).join('') + '</div></div>' +
+        '<div class="feld stapel"><span class="label">Zahlen korrekt übernommen?</span>' + (werte.length ? '<div class="akr-zeilen">' + werte.map(function (w) { return pruefZeile(w[1], esc(w[0])); }).join('') + '</div>' : '<p class="muted">Keine Messwerte im Fall.</p>') +
+        '<p class="hinweis">Die Prüfung sucht nach Schlüsselwörtern und Zahlen. Sie ersetzt kein Feedback vom Praxisanleiter.</p></div></section>' +
+        '<section class="feld-2 stapel"><span class="label">Muster' + (f.uebergabe ? '-Übergabe' : '-Gerüst') + '</span><p class="uebergabe">' + md(musterUebergabe(f)) + '</p></section>');
+    }
+    zeichne();
+  };
+
+  var PROTOKOLL_WERTE = ['AF', 'SpO2', 'HF', 'RR', 'BZ', 'Temp', 'GCS'];
+  var MASSNAHMEN = ['Sauerstoff', 'Monitoring', '12-Kanal-EKG', 'Lagerung', 'Wärmeerhalt', 'Immobilisation', 'Wundversorgung', 'Blutstillung', 'BZ-Messung', 'RTW nachgefordert', 'Notarzt nachgefordert', 'Transportverweigerung dokumentiert'];
+  VIEWS.protokoll = function (v, arg) {
+    var f = trainingFall(arg), p = patientInfo(f);
+    v.innerHTML = zurueck('training', 'Übergabe & Protokoll') + '<div class="stapel" style="gap:4px"><span class="label">Protokoll-Übung</span><h1>Einsatzprotokoll</h1></div>' + lageBox(f) +
+      '<form class="feld stapel rechner protokoll" id="protokoll" novalidate>' +
+        '<h3>Patient & Einsatz</h3><div class="raster-3">' +
+          '<label>Alter<input id="pAlter" type="number" inputmode="numeric"></label>' +
+          '<label>Geschlecht<select id="pGeschl"><option value="">–</option><option>männlich</option><option>weiblich</option><option>divers</option></select></label>' +
+          '<label>Einsatzart<select id="pArt"><option>Notfall</option><option>Notfall mit NA</option><option>Krankentransport</option><option>Fehleinsatz</option></select></label></div>' +
+        '<h3>Erstbefund</h3><div class="raster-3">' +
+          PROTOKOLL_WERTE.map(function (k) { return '<label>' + esc(wertName(k)) + '<input id="pw' + k + '" type="text" inputmode="decimal" placeholder="–"></label>'; }).join('') +
+          '<label>AVPU<select id="pAVPU"><option value="">–</option><option>A</option><option>V</option><option>P</option><option>U</option></select></label>' +
+          '<label>EKG<input id="pEKG" type="text" placeholder="z. B. Sinusrhythmus"></label></div>' +
+        '<h3>Verdachtsdiagnose</h3><label>Arbeitsdiagnose<input id="pDiag" type="text" placeholder="z. B. Verdacht auf …"></label>' +
+        '<h3>Maßnahmen</h3><div class="raster-3">' + MASSNAHMEN.map(function (m, i) { return '<label class="check"><input type="checkbox" id="pm' + i + '"> ' + esc(m) + '</label>'; }).join('') + '</div>' +
+        '<h3>Ergebnis</h3><div class="raster-3">' +
+          '<label>NACA<select id="pNACA"><option value="">–</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option></select></label>' +
+          '<label>Transportziel<input id="pZiel" type="text" placeholder="z. B. Klinik mit HKL"></label>' +
+          '<label>Übergabe an<select id="pAn"><option value="">–</option><option>ZNA</option><option>Schockraum</option><option>Notarzt / RTW</option><option>Hausarzt / KV-Dienst</option><option>Kein Transport</option></select></label></div>' +
+        '<button class="btn" type="submit" style="align-self:flex-start">Protokoll auswerten</button>' +
+      '</form><div id="protErg"></div>';
+    $('#andererFall').onclick = function () { gehe('protokoll-' + trainingFall().id); };
+    $('#protokoll').onsubmit = function (e) {
+      e.preventDefault();
+      var z = [];
+      z.push(pruefZeile(!!$('#pAlter').value && (!p.alter || $('#pAlter').value === p.alter), 'Alter', p.alter ? 'laut Fall ' + p.alter : ''));
+      z.push(pruefZeile(!!$('#pGeschl').value && (!p.geschlecht || $('#pGeschl').value === p.geschlecht), 'Geschlecht', p.geschlecht));
+      PROTOKOLL_WERTE.forEach(function (k) {
+        var soll = f.werte[k], ist = $('#pw' + k).value.trim();
+        if (!soll) { z.push(pruefZeile(ist ? true : null, esc(wertName(k)), ist ? 'eingetragen' : 'im Fall nicht angegeben – im Einsatz immer messen')); return; }
+        var ok = ist && zahlen(soll).every(function (x) { return enthaeltZahl(ist, x); });
+        z.push(pruefZeile(!!ok, esc(wertName(k)), 'laut Fall ' + esc(soll)));
+      });
+      var diag = $('#pDiag').value.toLowerCase();
+      var worte = f.diagnose.toLowerCase().replace(/[()–,.:+-]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 4 && ['verdacht', 'ausschließen', 'stabil', 'unter', 'hinter', 'harmlosem', 'upgrade'].indexOf(w) < 0; });
+      var dOk = !!diag && worte.some(function (w) { return diag.indexOf(w.slice(0, 6)) >= 0; });
+      z.push(pruefZeile(dOk, 'Verdachtsdiagnose', 'Muster: ' + esc(f.diagnose)));
+      var gewaehlt = MASSNAHMEN.filter(function (m, i) { return $('#pm' + i).checked; });
+      z.push(pruefZeile(gewaehlt.length >= 3, 'Maßnahmen dokumentiert', gewaehlt.length + ' angekreuzt'));
+      z.push(pruefZeile(!!$('#pNACA').value, 'NACA angegeben', ''));
+      z.push(pruefZeile(!!$('#pZiel').value.trim(), 'Transportziel angegeben', ''));
+      $('#protErg').innerHTML = '<section class="raster-2"><div class="feld stapel"><span class="label">Auswertung</span><div class="akr-zeilen">' + z.join('') + '</div></div>' +
+        '<div class="feld stapel"><span class="label">Musterlösung – Vorgehen</span><ul class="punkte">' + f.schritte.map(function (s) { return '<li>' + md(s.a) + '</li>'; }).join('') + '</ul>' +
+        (f.fehler.length ? '<span class="label">Typische Fehler</span><ul class="punkte">' + f.fehler.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul>' : '') + '</div></section>';
+      $('#protErg').scrollIntoView({ behavior: 'smooth' });
+    };
+  };
+
+  // ---------- Als App installieren ----------
+  var IM_ARTIFACT = !/^https?:$/.test(location.protocol) || /claude\.ai|claudeusercontent|anthropic/.test(location.hostname);
+  var installPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installPrompt = e; });
+  if (!IM_ARTIFACT && 'serviceWorker' in navigator) {
+    try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+  }
+  VIEWS.installieren = function (v) {
+    v.innerHTML = '<div class="stapel" style="gap:4px"><span class="label">Offline lernen</span><h1>Als App installieren</h1><p class="muted">Installiert startet die Lernapp vom Startbildschirm wie eine normale App – ohne Browserleiste und auch ohne Internet.</p></div>' +
+      (IM_ARTIFACT ? '<div class="cave"><span class="label" style="color:#ff8a8f">Hinweis</span><p>Diese Ansicht läuft eingebettet und lässt sich hier nicht installieren. Öffne dafür die eigene Web-Adresse der App (GitHub Pages).</p></div>' : '') +
+      '<section class="raster-2">' +
+        '<div class="feld stapel"><h2>iPhone / iPad (Safari)</h2><ol class="punkte"><li>Die App in <strong>Safari</strong> öffnen.</li><li>Unten auf <strong>Teilen</strong> tippen (Quadrat mit Pfeil).</li><li><strong>„Zum Home-Bildschirm“</strong> wählen.</li><li>Mit <strong>„Hinzufügen“</strong> bestätigen.</li></ol></div>' +
+        '<div class="feld stapel"><h2>Android (Chrome)</h2><ol class="punkte"><li>Die App in <strong>Chrome</strong> öffnen.</li><li>Oben rechts auf das <strong>Drei-Punkte-Menü</strong> tippen.</li><li><strong>„App installieren“</strong> bzw. „Zum Startbildschirm hinzufügen“ wählen.</li></ol>' +
+          '<button class="btn" id="installBtn" hidden>' + ico('install') + 'Jetzt installieren</button></div>' +
+      '</section>' +
+      '<p class="hinweis">Dein Lernfortschritt wird auf dem Gerät gespeichert. Nach der Installation funktioniert die App auch ohne Internet.</p>';
+    if (installPrompt) { var b = $('#installBtn'); b.hidden = false; b.onclick = function () { installPrompt.prompt(); installPrompt = null; b.hidden = true; }; }
+  };
+
   // ---------- Mehr (Handy) ----------
   VIEWS.mehr = function (v) {
     v.innerHTML = '<h1>Mehr</h1><div class="mehr-menue">' +
-      [['ekg', 'EKG-Rhythmen', 'ekg'], ['ekgtrainer', 'EKG-Trainer', 'ekg'], ['medis', 'Medikamente', 'medis'], ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner'], ['akronyme', 'Akronyme', 'abc'], ['pruefung', 'Prüfung simulieren', 'pruefung'], ['statistik', 'Fortschritt', 'stat']]
+      [['ekg', 'EKG-Rhythmen', 'ekg'], ['ekgtrainer', 'EKG-Trainer', 'ekg'], ['medis', 'Medikamente', 'medis'], ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner'], ['akronyme', 'Akronyme', 'abc'], ['training', 'Übergabe & Protokoll', 'training'], ['pruefung', 'Prüfung simulieren', 'pruefung'], ['installieren', 'Als App installieren', 'install'], ['statistik', 'Fortschritt', 'stat']]
         .map(function (x) { return '<button class="btn zweit" data-gehe="' + x[0] + '">' + ico(x[2]) + x[1] + '</button>'; }).join('') + '</div>' +
       '<p class="hinweis">Lernhilfe – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und der Notarzt.</p>';
   };
