@@ -8,7 +8,6 @@ RS.module = [
   {
     id: 'nktw',
     titel: 'N-KTW, Doku & Übergabe',
-    tag: 'Mo',
     kurz: 'Rolle als Einsatzführer auf dem N-KTW, Notarztindikationen, Dokumentation, SINNHAFT-Übergabe.',
     abschnitte: [
       { h: 'Rolle auf dem N-KTW', p: [
@@ -63,7 +62,6 @@ RS.module = [
   {
     id: 'schemata',
     titel: 'Schemata & Anamnese',
-    tag: 'Mo',
     kurz: 'xABCDE, AVPU, GCS, SAMPLER(S), OPQRST, BE-FAST, NACA – das Gerüst jeder Versorgung.',
     abschnitte: [
       { h: 'xABCDE', p: [
@@ -139,7 +137,6 @@ RS.module = [
   {
     id: 'intern',
     titel: 'Internistische Notfälle',
-    tag: 'Mo',
     kurz: 'ACS, Aortendissektion, Lungenödem, Lungenembolie, Asthma/COPD, Anaphylaxie, Hypoglykämie, Rhythmusstörungen.',
     abschnitte: [
       { h: 'Akutes Koronarsyndrom (ACS)', p: [
@@ -222,7 +219,6 @@ RS.module = [
   {
     id: 'trauma',
     titel: 'Traumatologische Notfälle',
-    tag: 'Mo',
     kurz: 'xABCDE beim Trauma, Blutstillung, Schock, Spannungspneu, SHT, Becken, Wirbelsäule, Verbrennung – nach S3-Leitlinie Polytrauma.',
     abschnitte: [
       { h: 'Vorgehen am Unfallort', p: [
@@ -285,7 +281,7 @@ RS.module = [
     karten: [
       ['Was tust du bei spritzender Blutung am Oberschenkel?', 'Sofort manuell komprimieren, dann direkt Tourniquet – eine Handbreit über der Wunde oder ganz proximal, fest bis Blutung steht, Uhrzeit notieren.'],
       ['Wie berechnet man den Schockindex?', 'Herzfrequenz ÷ systolischer Blutdruck. > 1 = Schock (S3-Schockraumkriterium > 0,9).'],
-      ['Ziel-RR bei permissiver Hypotonie?', 'Syst. ca. 80–90 mmHg; bei SHT höher (ca. 110 mmHg laut Kurs, S3: ≥ 90 mmHg).'],
+      ['Ziel-RR bei permissiver Hypotonie?', 'Syst. ca. 80–90 mmHg; bei SHT höher (ca. 110 mmHg; S3: ≥ 90 mmHg).'],
       ['Zeichen Spannungspneumothorax?', 'Einseitig fehlendes Atemgeräusch, zunehmende Atemnot, fallende SpO₂, fallender RR, evtl. gestaute Halsvenen.'],
       ['Monaldi-Position?', '2.–3. ICR, Medioklavikularlinie.'],
       ['Bülau-Position?', '4.–5. ICR, vordere bis mittlere Axillarlinie.'],
@@ -302,7 +298,6 @@ RS.module = [
   {
     id: 'nun',
     titel: 'NUN-Algorithmen',
-    tag: 'Di',
     kurz: 'Wie Behandlungsalgorithmen aufgebaut sind und wie du sie im Einsatz sicher anwendest.',
     abschnitte: [
       { h: 'Was sind die NUN-Algorithmen?', p: [
@@ -346,7 +341,6 @@ RS.module = [
   {
     id: 'ekg',
     titel: 'EKG-Diagnostik',
-    tag: 'Di',
     kurz: 'Systematische Rhythmusanalyse, die wichtigen präklinischen Rhythmen und das 12-Kanal-EKG beim Infarkt.',
     abschnitte: [
       { h: 'Grundlagen', p: [
@@ -405,7 +399,6 @@ RS.module = [
   {
     id: 'pharmacpr',
     titel: 'Pharmakologie zur CPR',
-    tag: 'Di',
     kurz: 'Adrenalin, Amiodaron, Lidocain – wann, wie viel, wie vorbereitet. Dazu Grundlagen Sympathikus/Parasympathikus.',
     abschnitte: [
       { h: 'Adrenalin (Epinephrin) in der Reanimation', p: [
@@ -461,7 +454,6 @@ RS.module = [
   {
     id: 'rea',
     titel: 'Reanimation Erwachsene',
-    tag: 'Mo/Di',
     kurz: 'BLS und ALS nach ERC, AED, Ablauf im Team, reversible Ursachen und Postreanimation.',
     abschnitte: [
       { h: 'Erkennen & Start', p: [
@@ -519,7 +511,6 @@ RS.module = [
   {
     id: 'reakind',
     titel: 'Reanimation Kinder & Säuglinge',
-    tag: 'Di',
     kurz: 'Paediatric BLS: 5 initiale Beatmungen, 15 : 2, Technik bei Säugling und Kind, Fremdkörperverlegung.',
     abschnitte: [
       { h: 'Besonderheiten', p: [
@@ -585,7 +576,6 @@ RS.module = [
   {
     id: 'airway',
     titel: 'Airway & Beatmung',
-    tag: 'Mo/Mi',
     kurz: 'Atemwegshilfen, extraglottische Atemwege (i-gel, Larynxtubus), Beutel-Masken-Beatmung, Kapnografie, CPAP.',
     abschnitte: [
       { h: 'Basismaßnahmen', p: [
@@ -641,7 +631,6 @@ RS.module = [
   {
     id: 'kommunikation',
     titel: 'Kommunikation & Kultur',
-    tag: 'Mi',
     kurz: 'Kommunikationsmodelle, Teamkommunikation, Sprachbarrieren und kulturelle Aspekte im Einsatz.',
     abschnitte: [
       { h: 'Kommunikationsmodelle', p: [
@@ -684,7 +673,6 @@ RS.module = [
   {
     id: 'manv',
     titel: 'MANV-Konzept',
-    tag: 'Mi',
     kurz: 'Massenanfall von Verletzten: erstes Fahrzeug, Sichtung, Kategorien, Strukturen.',
     abschnitte: [
       { h: 'Grundidee', p: [
@@ -713,7 +701,7 @@ RS.module = [
         '**Atemfrequenz > 30** → rot.',
         '**Kreislauf**: Radialispuls fehlt oder Rekap > 2 s → rot.',
         '**Befolgt Aufforderungen nicht** → rot.',
-        'Sonst → gelb. Welcher Algorithmus genau gilt, legt der Träger fest – im Kurs gelerntes Schema verwenden.',
+        'Sonst → gelb. Welcher Algorithmus genau gilt, legt der Träger fest – regional gültiges Schema verwenden.',
         'Pro Patient nur Sekunden: sichten, kennzeichnen (Anhängekarte), weiter. Nur lebensrettende Sofortmaßnahmen (Blutung stillen, Atemweg, stabile Seitenlage).'
       ]},
       { h: 'Strukturen', p: [
@@ -738,7 +726,6 @@ RS.module = [
   {
     id: 'spezial',
     titel: 'Adipositas & Dialyse',
-    tag: 'Do',
     kurz: 'Besonderheiten bei adipösen Patienten und Dialysepatienten: Atemweg, Lagerung, Shunt, Hyperkaliämie.',
     abschnitte: [
       { h: 'Adipositas – Probleme', p: [
@@ -787,7 +774,6 @@ RS.module = [
   {
     id: 'neuro',
     titel: 'Neuro & Psych',
-    tag: 'Do',
     kurz: 'Schlaganfall, Krampfanfall, Fieberkrampf, Meningitis, Synkope, Intoxikation, Suizidalität, Psychose, Delir.',
     abschnitte: [
       { h: 'Schlaganfall', p: [
@@ -842,7 +828,6 @@ RS.module = [
   {
     id: 'deeskalation',
     titel: 'Deeskalation & Eigenschutz',
-    tag: 'Do',
     kurz: 'Gefahren erkennen, Eigenschutz, Deeskalation, Gewalt im Einsatz, Rückzug.',
     abschnitte: [
       { h: 'Gefahren an der Einsatzstelle (AAAA C EEEE)', tabelle: [
@@ -895,7 +880,6 @@ RS.module = [
   {
     id: 'recht',
     titel: 'Rechtliches',
-    tag: 'alle',
     kurz: 'StGB, BGB, StVO und Landesrecht: was du darfst und musst.',
     abschnitte: [
       { h: 'Strafrecht', tabelle: [
@@ -944,7 +928,6 @@ RS.module = [
   {
     id: 'physio',
     titel: 'Physiologie-Basics',
-    tag: 'Grundlagen',
     kurz: 'Herz, Kreislauf, Atmung und Blut – das Wissen hinter den Vitalwerten.',
     abschnitte: [
       { h: 'Herz', p: [

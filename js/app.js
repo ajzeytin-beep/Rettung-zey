@@ -10,7 +10,7 @@
   function mischen(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
   function heuteISO(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  function modulName(id) { if (id === 'medis') return 'Medikamente'; var m = RS.module.find(function (x) { return x.id === id; }); return m ? m.titel : id; }
+  function modulName(id) { if (id === 'medis') return 'Medikamente'; if (id === 'akronyme') return 'Akronyme'; var m = RS.module.find(function (x) { return x.id === id; }); return m ? m.titel : id; }
 
   // ---------- Icons ----------
   var I = {
@@ -22,7 +22,7 @@
     medis: '<rect x="3" y="9" width="18" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.5 8.5l5 7"/>',
     faelle: '<path d="M9 4h6v3H9z"/><path d="M7 5H5v16h14V5h-2"/><path d="M12 10v6M9 13h6"/>',
     rechner: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>',
-    plan: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    abc: '<path d="M3 17l3.5-10L10 17M4.2 14h4.6"/><path d="M13 7h3.2a2.3 2.3 0 0 1 0 4.6H13zM13 11.6h3.8a2.7 2.7 0 0 1 0 5.4H13z"/>',
     mehr: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
     pruefung: '<path d="M8 3h8l3 3v15H5V3z"/><path d="M9 12l2 2 4-4"/>',
     ziel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
@@ -81,6 +81,23 @@
     KARTEN.push({ key: 'medis:' + x.id + ':d', m: 'medis', v: x.name + ' – Dosis (Erwachsene) und wichtigste Kontraindikation/Cave?', h: x.dosis + '. ' + (x.ki[0] ? 'KI: ' + x.ki[0] + '. ' : '') + (x.cave || '') });
   });
 
+  RS.akronyme.forEach(function (a) {
+    KARTEN.push({ key: 'akronyme:' + a.id, m: 'akronyme', v: 'Wofür steht ' + a.name + '?', h: a.b.map(function (x) { return '**' + x[0] + '** ' + x[1]; }).join(' · ') });
+  });
+  // Quizfragen aus den Akronymen: „Wofür steht Buchstabe X?“ für jede zweite Position
+  var OHNE_QUIZ = ['rosc', 'manv', 'btm', 'closedloop', 'mstart', 'qsofa'];
+  RS.akronyme.forEach(function (a) {
+    if (OHNE_QUIZ.indexOf(a.id) >= 0 || a.b.length < 4) return;
+    a.b.forEach(function (x, i) {
+      if (i % 2) return;
+      var falsch = mischen(a.b.filter(function (y) { return y[1] !== x[1]; })).slice(0, 3).map(function (y) { return y[1]; });
+      var antw = mischen([x[1]].concat(falsch));
+      var q = { m: 'akronyme', f: 'Wofür steht „' + x[0] + '“ (Position ' + (i + 1) + ') in ' + a.name + '?', a: antw, k: antw.indexOf(x[1]), e: a.name + ': ' + a.b.map(function (y) { return y[0] + ' = ' + y[1]; }).join(', ') + '.' };
+      q.id = hash(q.f);
+      RS.fragen.push(q);
+    });
+  });
+
   var INTERVALL = [0, 10 * 60e3, 60 * 60e3, 24 * 3600e3, 3 * 24 * 3600e3, 7 * 24 * 3600e3];
   function karteFaellig(k) { var s = S.karten[k.key]; return !s || s.due <= Date.now(); }
   function karteBox(k) { var s = S.karten[k.key]; return s ? s.box : 0; }
@@ -95,7 +112,7 @@
     return { pct: Math.round(wert * 100), fragen: fr.length, fragenOk: ok, karten: ka.length, kartenOk: kok, gelesen: !!g };
   }
   function gesamt() {
-    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis']);
+    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis', 'akronyme']);
     var summe = ids.reduce(function (a, id) { return a + modulStand(id).pct; }, 0);
     var beantwortet = 0, richtig = 0, versuche = 0;
     Object.keys(S.fragen).forEach(function (k) { var s = S.fragen[k]; beantwortet++; richtig += s.r; versuche += s.r + s.f; });
@@ -111,8 +128,8 @@
   // ---------- Navigation ----------
   var NAV = [
     ['start', 'Start', 'start'], ['lernen', 'Lernmodule', 'lernen'], ['karten', 'Karteikarten', 'karten'],
-    ['quiz', 'Quiz & Prüfung', 'quiz'], ['ekg', 'EKG-Rhythmen', 'ekg'], ['medis', 'Medikamente', 'medis'],
-    ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner'], ['plan', 'Stundenplan', 'plan']
+    ['quiz', 'Quiz & Prüfung', 'quiz'], ['akronyme', 'Akronyme', 'abc'], ['ekg', 'EKG-Rhythmen', 'ekg'], ['medis', 'Medikamente', 'medis'],
+    ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner']
   ];
   var TABS = [['start', 'Start', 'start'], ['lernen', 'Lernen', 'lernen'], ['karten', 'Karten', 'karten'], ['quiz', 'Quiz', 'quiz'], ['mehr', 'Mehr', 'mehr']];
   var BEREICH = { modul: 'lernen', medi: 'medis', fall: 'faelle', ekgtrainer: 'ekg', pruefung: 'quiz', schwaechen: 'quiz', statistik: 'start' };
@@ -146,7 +163,7 @@
     var bereich = BEREICH[name] || name;
     document.querySelectorAll('[data-nav]').forEach(function (b) {
       var n = b.getAttribute('data-nav');
-      var aktiv = n === bereich || (n === 'mehr' && ['ekg', 'medis', 'faelle', 'rechner', 'plan', 'mehr'].indexOf(bereich) >= 0 && b.closest('.bottomnav'));
+      var aktiv = n === bereich || (n === 'mehr' && ['ekg', 'medis', 'faelle', 'rechner', 'akronyme', 'mehr'].indexOf(bereich) >= 0 && b.closest('.bottomnav'));
       b.classList.toggle('aktiv', !!aktiv);
     });
     var v = $('#view');
@@ -169,19 +186,8 @@
   VIEWS.start = function (v) {
     var g = gesamt();
     var umfang = 2 * Math.PI * 52, off = umfang * (1 - g.pct / 100);
-    var heute = heuteISO();
-    var tag = RS.stundenplan.find(function (d) { return d.datum === heute; });
-    var heuteTitel = 'Heute im Kurs';
-    if (!tag) {
-      if (heute < RS.stundenplan[0].datum) { tag = RS.stundenplan[0]; heuteTitel = 'Erster Kurstag'; }
-      else { tag = RS.stundenplan.find(function (d) { return d.datum > heute; }); heuteTitel = 'Nächster Kurstag'; }
-    }
-    var letzteP = S.pruefungen[S.pruefungen.length - 1];
-    var heuteHtml = tag ? tag.einheiten.map(function (e) {
-      return '<div class="heute-zeile"><span class="mono muted">' + e.zeit + '</span><span class="art ' + e.art + '">' + e.art + '</span><span>' + esc(e.titel) + '</span>' +
-        (zielFuer(e.modul) ? '<button class="btn zweit klein" data-gehe="' + zielFuer(e.modul) + '">Lernen</button>' : '<span></span>') + '</div>';
-    }).join('') : '<p class="muted">Der Lehrgang ist abgeschlossen. Wiederholen kannst du trotzdem jederzeit.</p>';
 
+    var letzteP = S.pruefungen[S.pruefungen.length - 1];
     var h = heuteStand(), jetzt = new Date(), std = jetzt.getHours();
     var gruss = std < 11 ? 'Moin!' : std < 18 ? 'Weiter geht’s!' : 'Noch eine Runde?';
     var datumText = jetzt.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -191,6 +197,7 @@
       var ist = Math.min(h[z[0]], ZIELE[z[0]]), ok = ist >= ZIELE[z[0]];
       return '<button class="tagesziel' + (ok ? ' ok' : '') + '" data-gehe="' + z[2] + '"><b class="mono">' + ist + '<span>/' + ZIELE[z[0]] + '</span></b><span>' + z[1] + '</span>' + balken(pct(ist, ZIELE[z[0]]), ok) + '</button>';
     }).join('');
+    var akr = RS.akronyme[(Math.floor(jetzt / 864e5) + 7) % RS.akronyme.length];
     var merksatz = MERKSAETZE[Math.floor(jetzt / 864e5) % MERKSAETZE.length];
     v.innerHTML =
       '<section class="hero">' +
@@ -222,30 +229,23 @@
         '<button class="btn aktion" data-gehe="schwaechen">' + ico('ziel') + 'Schwächen üben<small>' + schwaechen().length + ' offene Fehler</small></button>' +
       '</section>' +
       '<section class="raster-2">' +
-        '<div class="feld stapel"><div class="kopf"><h2>' + heuteTitel + '</h2>' + (tag ? '<span class="chip rot">' + esc(tag.tag) + ', ' + tag.datum.split('-').reverse().slice(0, 2).join('.') + '.</span>' : '') + '</div>' +
-          '<div class="heute-liste">' + heuteHtml + '</div><button class="btn zweit klein" data-gehe="plan" style="align-self:flex-start">Ganze Woche ansehen</button></div>' +
+        '<div class="feld stapel"><div class="kopf"><div class="stapel"><span class="label">Akronym des Tages</span><h2>' + esc(akr.name) + '</h2></div><button class="btn zweit klein" data-gehe="akronyme">Alle Akronyme</button></div>' +
+          '<p class="muted">' + esc(akr.titel) + '</p>' + akronymTabelle(akr) + '</div>' +
         '<div class="feld stapel"><div class="kopf"><h2>Module</h2><button class="btn zweit klein" data-gehe="lernen">Alle</button></div><div class="modul-liste">' +
           RS.module.map(function (m) { var s = modulStand(m.id); return '<button class="modul-zeile" data-gehe="modul-' + m.id + '"><span>' + esc(m.titel) + '</span>' + balken(s.pct, s.pct >= 80) + '<span class="pct">' + s.pct + '%</span></button>'; }).join('') +
         '</div></div>' +
       '</section>' +
-      '<p class="hinweis">Diese App ist eine Lernhilfe aus deinen Kursunterlagen. Dosierungen sind Richtwerte für Erwachsene – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und die Freigabe durch den Notarzt.</p>';
+      '<p class="hinweis">Diese App ist eine Lernhilfe. Dosierungen sind Richtwerte für Erwachsene – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und die Freigabe durch den Notarzt.</p>';
 
   };
   function kachel(wert, label) { return '<div class="feld kachel"><b>' + wert + '</b><span class="label">' + label + '</span></div>'; }
-  function zielFuer(modul) {
-    if (!modul) return null;
-    if (modul === 'faelle') return 'faelle';
-    if (modul === 'pruefung') return 'pruefung';
-    if (modul === 'ekg') return 'modul-ekg';
-    return 'modul-' + modul;
-  }
 
   // Modulübersicht
   VIEWS.lernen = function (v) {
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Nach Stundenplan</span><h1>Lernmodule</h1></div></div>' +
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.module.length + ' Themen</span><h1>Lernmodule</h1></div></div>' +
       '<div class="raster">' + RS.module.map(function (m) {
         var s = modulStand(m.id);
-        return '<button class="feld modul-karte" data-gehe="modul-' + m.id + '"><div class="reihe"><span class="chip">' + esc(m.tag) + '</span>' + (s.gelesen ? '<span class="chip ok">gelesen</span>' : '') + '</div>' +
+        return '<button class="feld modul-karte" data-gehe="modul-' + m.id + '">' + (s.gelesen ? '<div class="reihe"><span class="chip ok">gelesen</span></div>' : '') +
           '<h3>' + esc(m.titel) + '</h3><p>' + esc(m.kurz) + '</p>' + balken(s.pct, s.pct >= 80) +
           '<span class="muted" style="font-size:.8rem">' + s.fragenOk + '/' + s.fragen + ' Fragen · ' + s.kartenOk + '/' + s.karten + ' Karten</span></button>';
       }).join('') + '</div>';
@@ -258,7 +258,7 @@
     var s = modulStand(id);
     var extra = id === 'ekg' ? '<button class="btn zweit" data-gehe="ekg">' + ico('ekg') + 'Rhythmen ansehen</button>' : '';
     v.innerHTML = zurueck('lernen', 'Lernmodule') +
-      '<div class="kopf"><div class="stapel"><span class="label">Modul · ' + esc(m.tag) + '</span><h1>' + esc(m.titel) + '</h1><p class="muted">' + esc(m.kurz) + '</p></div>' +
+      '<div class="kopf"><div class="stapel"><span class="label">Lernmodul</span><h1>' + esc(m.titel) + '</h1><p class="muted">' + esc(m.kurz) + '</p></div>' +
       '<div class="reihe"><button class="btn" data-gehe="quiz-' + id + '">' + ico('quiz') + 'Quiz (' + s.fragen + ')</button><button class="btn zweit" data-gehe="karten-' + id + '">' + ico('karten') + 'Karten (' + s.karten + ')</button>' + extra + '</div></div>' +
       m.abschnitte.map(function (a) {
         var body = a.tabelle ? tabelle(a.tabelle) : '<ul class="punkte">' + a.p.map(function (p) { return '<li>' + md(p) + '</li>'; }).join('') + '</ul>';
@@ -282,11 +282,11 @@
       var pool = arg === 'alle' ? RS.fragen : RS.fragen.filter(function (q) { return q.m === arg; });
       return starteQuiz(v, mischen(pool), { titel: arg === 'alle' ? 'Alle Fragen' : modulName(arg), modus: 'uebung', zurueck: arg === 'alle' || arg === 'medis' ? 'quiz' : 'modul-' + arg });
     }
-    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis']);
+    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis', 'akronyme']);
     var verlauf = S.pruefungen.slice(-5).reverse();
     v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Multiple Choice</span><h1>Quiz & Prüfung</h1></div></div>' +
       '<section class="raster-2">' +
-        '<div class="feld stapel"><h2>Prüfungssimulation</h2><p class="muted">40 zufällige Fragen aus allen Themen, 45 Minuten. Die Auswertung kommt erst am Ende – wie am Freitag.</p>' +
+        '<div class="feld stapel"><h2>Prüfungssimulation</h2><p class="muted">40 zufällige Fragen aus allen Themen, 45 Minuten. Die Auswertung kommt erst am Ende.</p>' +
           '<button class="btn" data-gehe="pruefung">' + ico('pruefung') + 'Simulation starten</button>' +
           (verlauf.length ? '<div class="stapel"><span class="label">Letzte Versuche</span>' + verlauf.map(function (p) { return '<div class="reihe" style="justify-content:space-between"><span class="mono muted">' + esc(p.datum) + '</span><span class="chip ' + (p.pct >= 70 ? 'ok' : 'rot') + '">' + p.richtig + '/' + p.n + ' · ' + p.pct + ' %</span></div>'; }).join('') + '</div>' : '') +
         '</div>' +
@@ -409,7 +409,7 @@
   var K = null;
   VIEWS.karten = function (v, arg) {
     if (arg) return starteKarten(v, arg);
-    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis']);
+    var ids = RS.module.map(function (m) { return m.id; }).concat(['medis', 'akronyme']);
     var boxen = [0, 0, 0, 0, 0];
     KARTEN.forEach(function (k) { boxen[Math.min(4, karteBox(k))]++; });
     var namen = ['Neu', 'Box 1', 'Box 2', 'Box 3', 'Sicher'];
@@ -534,7 +534,7 @@
     v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.medikamente.length + ' Wirkstoffe</span><h1>Medikamente</h1><p class="muted">Richtwerte für Erwachsene. Verbindlich sind eure SOPs und die Freigabe durch den Notarzt.</p></div>' +
       '<div class="reihe"><button class="btn" data-gehe="karten-medis">' + ico('karten') + 'Karten</button><button class="btn zweit" data-gehe="quiz-medis">Quiz</button></div></div>' +
       '<input class="suche" id="medisuche" type="search" placeholder="Suchen: Name, Handelsname, Indikation …" aria-label="Medikamente durchsuchen">' +
-      '<div class="filter" id="medifilter"><button class="aktiv" data-f="kurs">18 aus dem Kurs</button><button data-f="alle">Alle</button></div>' +
+      '<div class="filter" id="medifilter"><button class="aktiv" data-f="kurs">Kernmedikamente</button><button data-f="alle">Alle</button></div>' +
       '<div class="raster" id="mediliste"></div>';
     var filter = 'kurs';
     function liste() {
@@ -544,7 +544,7 @@
         return !s || [x.name, x.handel, x.gruppe, x.ind].join(' ').toLowerCase().indexOf(s) >= 0;
       });
       $('#mediliste').innerHTML = l.length ? l.map(function (x) {
-        return '<button class="feld medi-zeile" data-gehe="medi-' + x.id + '"><span class="medi-name">' + esc(x.name) + '</span>' + (x.kurs ? '<span class="chip rot">Kurs</span>' : '<span></span>') +
+        return '<button class="feld medi-zeile" data-gehe="medi-' + x.id + '"><span class="medi-name">' + esc(x.name) + '</span>' + (x.kurs ? '<span class="chip rot">Kern</span>' : '<span></span>') +
           '<span class="ind">' + esc(x.gruppe) + ' · ' + esc(x.ind) + '</span></button>';
       }).join('') : '<p class="muted">Kein Medikament gefunden.</p>';
     }
@@ -565,15 +565,15 @@
     if (x.kinder) zeilen.push(['Dosierung Kinder', '<span class="dosis">' + md(x.kinder) + '</span>']);
     if (x.wirk) zeilen.push(['Wirkung / Merkhilfe', md(x.wirk)]);
     v.innerHTML = zurueck('medis', 'Medikamente') +
-      '<div class="kopf"><div class="stapel"><span class="label">' + esc(x.handel || 'Wirkstoff') + '</span><h1>' + esc(x.name) + '</h1></div>' + (x.kurs ? '<span class="chip rot">Aus der Lernsession</span>' : '') + '</div>' +
+      '<div class="kopf"><div class="stapel"><span class="label">' + esc(x.handel || 'Wirkstoff') + '</span><h1>' + esc(x.name) + '</h1></div>' + (x.kurs ? '<span class="chip rot">Kernmedikament</span>' : '') + '</div>' +
       '<section class="feld" style="padding:0;overflow:hidden"><div class="steckbrief">' + zeilen.map(function (z) { return '<div>' + z[0] + '</div><div>' + z[1] + '</div>'; }).join('') + '</div></section>' +
       (x.cave ? '<div class="cave"><span class="label" style="color:#ff8a8f">Cave</span><p>' + md(x.cave) + '</p></div>' : '') +
-      (x.fehler ? '<div class="feld-2"><span class="label">Typischer Fehler im Kurs</span><p>' + md(x.fehler) + '</p></div>' : '');
+      (x.fehler ? '<div class="feld-2"><span class="label">Häufige Verwechslung</span><p>' + md(x.fehler) + '</p></div>' : '');
   };
 
   // ---------- Fallbeispiele ----------
   VIEWS.faelle = function (v) {
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Simulationstraining</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage, überlege deine Antwort und decke dann die Musterlösung auf.</p></div></div>' +
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Üben am Fall</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage, überlege deine Antwort und decke dann die Musterlösung auf.</p></div></div>' +
       '<div class="raster">' + RS.faelle.map(function (f) {
         var s = S.faelle[f.id];
         return '<button class="feld modul-karte" data-gehe="fall-' + f.id + '"><div class="reihe"><span class="chip">' + esc(f.kat) + '</span>' + (s ? '<span class="chip ok">bearbeitet</span>' : '') + '</div><h3>' + esc(f.titel) + '</h3><p>' + esc(f.lage) + '</p></button>';
@@ -664,24 +664,49 @@
     gcs(); si(); q(); kind();
   };
 
-  // ---------- Stundenplan ----------
-  VIEWS.plan = function (v) {
-    var heute = heuteISO();
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Kurswoche 26.–30.10.</span><h1>Stundenplan</h1><p class="muted">Tippe auf eine Einheit, um das passende Modul zu öffnen.</p></div>' +
-      '<div class="reihe"><span class="chip">T Theorie</span><span class="chip warn">P Praxis</span><span class="chip rot">X Prüfung</span></div></div>' +
-      '<div class="tag-spalten">' + RS.stundenplan.map(function (d) {
-        return '<div class="feld tag-spalte' + (d.datum === heute ? ' heute' : '') + '"><div class="reihe" style="justify-content:space-between"><h3>' + esc(d.tag) + '</h3><span class="mono muted">' + d.datum.split('-').reverse().slice(0, 2).join('.') + '.</span></div>' +
-          d.einheiten.map(function (e) {
-            var z = zielFuer(e.modul);
-            return '<button class="einheit"' + (z ? ' data-gehe="' + z + '" data-ziel="1"' : ' disabled') + '><span class="reihe" style="gap:8px"><span class="art ' + e.art + '">' + e.art + '</span><span class="mono muted">' + e.zeit + '</span></span><span>' + esc(e.titel) + '</span></button>';
-          }).join('') + '</div>';
-      }).join('') + '</div>';
+
+  // ---------- Akronyme ----------
+  function akronymTabelle(a) {
+    return '<div class="akr-zeilen">' + a.b.map(function (x) {
+      return '<div class="akr-zeile"><span class="akr-b">' + esc(x[0]) + '</span><span><strong>' + esc(x[1]) + '</strong>' + (x[2] ? '<span class="muted"> – ' + md(x[2]) + '</span>' : '') + '</span></div>';
+    }).join('') + '</div>';
+  }
+  VIEWS.akronyme = function (v) {
+    var kats = [];
+    RS.akronyme.forEach(function (a) { if (kats.indexOf(a.kat) < 0) kats.push(a.kat); });
+    var kat = 'Alle';
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.akronyme.length + ' Schemata und Abkürzungen</span><h1>Akronyme</h1><p class="muted">Von SINNHAFT bis NRettDG – Merkschemata aus dem Rettungsdienst und Abkürzungen aus Niedersachsen.</p></div>' +
+      '<div class="reihe"><button class="btn" data-gehe="karten-akronyme">' + ico('karten') + 'Karten</button><button class="btn zweit" data-gehe="quiz-akronyme">Quiz</button></div></div>' +
+      '<input class="suche" id="akrsuche" type="search" placeholder="Suchen: z. B. SAMPLER, Übergabe, Schock …" aria-label="Akronyme durchsuchen">' +
+      '<div class="filter" id="akrfilter">' + ['Alle'].concat(kats).map(function (k, i) { return '<button' + (i ? '' : ' class="aktiv"') + ' data-k="' + esc(k) + '">' + esc(k) + '</button>'; }).join('') + '</div>' +
+      '<div class="akr-raster" id="akrliste"></div>';
+    function liste() {
+      var q = $('#akrsuche').value.trim().toLowerCase();
+      var l = RS.akronyme.filter(function (a) {
+        if (kat !== 'Alle' && a.kat !== kat) return false;
+        return !q || JSON.stringify([a.name, a.titel, a.b, a.hinweis || '']).toLowerCase().indexOf(q) >= 0;
+      });
+      $('#akrliste').innerHTML = l.length ? l.map(function (a) {
+        return '<section class="feld stapel akr-karte"><div class="reihe" style="justify-content:space-between"><h2>' + esc(a.name) + '</h2><span class="chip">' + esc(a.kat) + '</span></div>' +
+          '<p class="muted">' + esc(a.titel) + '</p>' + akronymTabelle(a) +
+          (a.hinweis ? '<p class="hinweis">' + md(a.hinweis) + '</p>' : '') +
+          '<span class="muted" style="font-size:.75rem">Quelle: ' + esc(a.quelle) + '</span></section>';
+      }).join('') : '<p class="muted">Nichts gefunden.</p>';
+    }
+    $('#akrsuche').oninput = liste;
+    $('#akrfilter').onclick = function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      kat = b.getAttribute('data-k');
+      $('#akrfilter').querySelectorAll('button').forEach(function (x) { x.classList.toggle('aktiv', x === b); });
+      liste();
+    };
+    liste();
   };
 
   // ---------- Mehr (Handy) ----------
   VIEWS.mehr = function (v) {
     v.innerHTML = '<h1>Mehr</h1><div class="mehr-menue">' +
-      [['ekg', 'EKG-Rhythmen', 'ekg'], ['ekgtrainer', 'EKG-Trainer', 'ekg'], ['medis', 'Medikamente', 'medis'], ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner'], ['plan', 'Stundenplan', 'plan'], ['pruefung', 'Prüfung simulieren', 'pruefung'], ['statistik', 'Fortschritt', 'stat']]
+      [['ekg', 'EKG-Rhythmen', 'ekg'], ['ekgtrainer', 'EKG-Trainer', 'ekg'], ['medis', 'Medikamente', 'medis'], ['faelle', 'Fallbeispiele', 'faelle'], ['rechner', 'Rechner & Scores', 'rechner'], ['akronyme', 'Akronyme', 'abc'], ['pruefung', 'Prüfung simulieren', 'pruefung'], ['statistik', 'Fortschritt', 'stat']]
         .map(function (x) { return '<button class="btn zweit" data-gehe="' + x[0] + '">' + ico(x[2]) + x[1] + '</button>'; }).join('') + '</div>' +
       '<p class="hinweis">Lernhilfe – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und der Notarzt.</p>';
   };
