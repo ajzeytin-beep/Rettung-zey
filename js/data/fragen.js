@@ -29,6 +29,11 @@ RS.fragen = [
   { m: 'schemata', f: 'Woraus besteht die tödliche Trias beim Trauma?', a: ['Hypoxie, Hypotonie, Hypoglykämie', 'Hypothermie, Azidose, Koagulopathie', 'Tachykardie, Hypotonie, Zyanose', 'Blutung, Schmerz, Angst'], k: 1, e: 'Unterkühlung, Übersäuerung, Gerinnungsstörung.' },
   { m: 'schemata', f: 'Warum kann ein Schock unter Betablockern übersehen werden?', a: ['Betablocker erhöhen den Blutdruck', 'Betablocker verhindern die kompensatorische Tachykardie', 'Betablocker färben die Haut rosig', 'Betablocker senken den Blutzucker'], k: 1, e: 'Die Gegenregulation über die Herzfrequenz fehlt.' },
 
+  { m: 'schemata', f: 'Wofür steht NEWS2?', a: ['Neurologischer Erstuntersuchungs-Score', 'National Early Warning Score 2', 'Notfall-Einsatz-Wert-Skala', 'New Emergency Ward Score'], k: 1, e: 'Frühwarnscore aus AF, SpO₂, O₂-Gabe, RR, Puls, Bewusstsein und Temperatur.' },
+  { m: 'schemata', f: 'Ab welchem NEWS2-Wert besteht ein hohes Risiko (Notfall)?', a: ['ab 3', 'ab 5', 'ab 7', 'ab 12'], k: 2, e: '0–4 niedrig, 5–6 mittel, ab 7 hoch.' },
+  { m: 'schemata', f: 'Wie viele Punkte gibt beim NEWS2 eine Sauerstoffgabe?', a: ['0', '1', '2', '3'], k: 2, e: 'Sauerstoffpflichtigkeit allein zählt 2 Punkte.' },
+  { m: 'schemata', f: 'Ein Patient ist neu verwirrt. Wie viele NEWS2-Punkte gibt das?', a: ['0', '1', '2', '3'], k: 3, e: 'Neue Verwirrtheit, V, P oder U = 3 Punkte (ACVPU).' },
+
   // ---------- Internistisch ----------
   { m: 'intern', f: 'Ab welcher SpO₂ gibt man beim ACS Sauerstoff?', a: ['< 98 %', '< 94 %', '< 90 %', 'Immer'], k: 2, e: 'O₂ beim ACS nur bei SpO₂ < 90 %.' },
   { m: 'intern', f: 'Wann muss beim ACS das 12-Kanal-EKG vorliegen?', a: ['Innerhalb von 10 Minuten', 'Innerhalb von 30 Minuten', 'In der Klinik', 'Nur bei Brustschmerz > 1 h'], k: 0, e: 'Innerhalb von 10 Minuten nach Erstkontakt.' },

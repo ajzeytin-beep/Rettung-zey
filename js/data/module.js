@@ -62,7 +62,7 @@ RS.module = [
   {
     id: 'schemata',
     titel: 'Schemata & Anamnese',
-    kurz: 'xABCDE, AVPU, GCS, SAMPLER(S), OPQRST, BE-FAST, NACA – das Gerüst jeder Versorgung.',
+    kurz: 'xABCDE, AVPU, GCS, SAMPLER(S), OPQRST, BE-FAST, NACA, NEWS2 – das Gerüst jeder Versorgung.',
     abschnitte: [
       { h: 'xABCDE', p: [
         '**x / c – critical bleeding**: lebensbedrohliche Blutung sofort stoppen (Kompression, Tourniquet, Wundpacking) – noch vor A.',
@@ -116,6 +116,22 @@ RS.module = [
         'Immer **Blutzucker** – Hypoglykämie imitiert Schlaganfall.',
         '**NACA**-Score 0–VII: IV = Vitalgefährdung möglich (NA nötig), V = akute Lebensgefahr, VI = Reanimation, VII = tot.',
         '**4S-Regel** (psychische Erste Hilfe): Sag, dass du da bist – Sprich und hör zu – Suche Körperkontakt – Schirm ab.'
+      ]},
+      { h: 'NEWS2 – Frühwarnscore', tabelle: [
+        ['Parameter', '3', '2', '1', '0', '1', '2', '3'],
+        ['Atemfrequenz', '≤ 8', '', '9–11', '12–20', '', '21–24', '≥ 25'],
+        ['SpO₂ (Skala 1)', '≤ 91', '92–93', '94–95', '≥ 96', '', '', ''],
+        ['Sauerstoff', '', 'ja', '', 'Raumluft', '', '', ''],
+        ['RR systolisch', '≤ 90', '91–100', '101–110', '111–219', '', '', '≥ 220'],
+        ['Puls', '≤ 40', '', '41–50', '51–90', '91–110', '111–130', '≥ 131'],
+        ['Bewusstsein', '', '', '', 'wach (A)', '', '', 'neu verwirrt, V, P, U'],
+        ['Temperatur', '≤ 35,0', '', '35,1–36,0', '36,1–38,0', '38,1–39,0', '≥ 39,1', '']
+      ]},
+      { h: 'NEWS2 – Auswertung', p: [
+        '**0–4**: niedriges Risiko · **3 Punkte in einem einzelnen Wert**: dringend ärztlich prüfen.',
+        '**5–6**: mittleres Risiko → dringende Abklärung. **Ab 7**: hohes Risiko → Notfall, Notarzt.',
+        'SpO₂-**Skala 2** nur bei bekannter Hyperkapnie (z. B. COPD) mit Ziel 88–92 %.',
+        'Gut für **Verlaufskontrollen** und Übergaben: steigender Score = Patient verschlechtert sich.'
       ]}
     ],
     karten: [
@@ -130,6 +146,8 @@ RS.module = [
       ['Wofür steht BE-FAST?', 'Balance, Eyes, Face, Arms, Speech, Time.'],
       ['Was gehört in D (Disability)?', 'AVPU/GCS, Pupillen, BE-FAST, Blutzucker.'],
       ['Tödliche Trias beim Trauma?', 'Hypothermie, Azidose (Übersäuerung), Koagulopathie (Gerinnungsstörung).'],
+      ['NEWS2 – welche 7 Parameter?', 'Atemfrequenz, SpO₂, Sauerstoffgabe, RR systolisch, Puls, Bewusstsein (ACVPU), Temperatur.'],
+      ['NEWS2 – Auswertung?', '0–4 niedrig (3 in einem Wert = dringend prüfen), 5–6 mittel, ab 7 hoch/Notfall.'],
       ['NACA V bedeutet?', 'Akute Lebensgefahr – Transport unter Reanimationsbereitschaft.']
     ]
   },

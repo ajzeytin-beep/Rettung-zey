@@ -629,6 +629,20 @@
           '<label class="check"><input type="checkbox" id="q2"> Bewusstseinsveränderung (GCS &lt; 15)</label>' +
           '<label class="check"><input type="checkbox" id="q3"> RR systolisch ≤ 100 mmHg</label>' +
           '<div class="reihe"><span class="ergebnis" id="qErg"></span><span id="qTxt"></span></div></div>' +
+        '<div class="feld stapel rechner news"><h2>NEWS2</h2><p class="muted" style="font-size:.88rem">National Early Warning Score – erkennt, wie stark sich ein Patient verschlechtert.</p>' +
+          '<div class="raster-2">' +
+            '<label>Atemfrequenz /min<input id="nAF" type="number" inputmode="numeric" value="22"></label>' +
+            '<label>SpO₂ %<input id="nSpO2" type="number" inputmode="numeric" value="93"></label>' +
+            '<label>RR systolisch mmHg<input id="nRR" type="number" inputmode="numeric" value="105"></label>' +
+            '<label>Puls /min<input id="nHF" type="number" inputmode="numeric" value="112"></label>' +
+            '<label>Temperatur °C<input id="nT" type="number" inputmode="decimal" step="0.1" value="38.4"></label>' +
+            '<label>Bewusstsein<select id="nB"><option value="0">A – wach</option><option value="3">Neu verwirrt / V / P / U</option></select></label>' +
+          '</div>' +
+          '<label class="check"><input type="checkbox" id="nO2"> Bekommt Sauerstoff</label>' +
+          '<label class="check"><input type="checkbox" id="nSkala2"> SpO₂-Skala 2 (bekannte Hyperkapnie, Ziel 88–92 %, z. B. COPD)</label>' +
+          '<div class="reihe"><span class="ergebnis" id="nErg"></span><span id="nTxt"></span></div>' +
+          '<div id="nDetail" class="akr-zeilen"></div>' +
+          '<p class="hinweis">0–4 niedrig · 3 Punkte in einem Parameter = dringend prüfen · 5–6 mittel · ab 7 hoch (Notfall).</p></div>' +
         '<div class="feld stapel rechner"><h2>Kinder-Notfall</h2>' +
           '<label>Alter in Jahren (1–10)<input id="kAlter" type="number" inputmode="numeric" min="1" max="10" value="4"></label>' +
           '<div id="kErg" class="stapel" style="gap:6px"></div>' +
@@ -651,6 +665,28 @@
       $('#qErg').textContent = n + '/3';
       $('#qTxt').innerHTML = n >= 2 ? '<span class="chip rot">Sepsisverdacht</span>' : '<span class="chip">unter 2 Punkten</span>';
     }
+    function news() {
+      function stufe(w, grenzen) { for (var i = 0; i < grenzen.length; i++) if (w <= grenzen[i][0]) return grenzen[i][1]; return grenzen[grenzen.length - 1][1]; }
+      var af = +$('#nAF').value, sp = +$('#nSpO2').value, rr = +$('#nRR').value, hf = +$('#nHF').value, t = parseFloat(String($('#nT').value).replace(',', '.')), o2 = $('#nO2').checked;
+      var spP;
+      if (!$('#nSkala2').checked) spP = stufe(sp, [[91, 3], [93, 2], [95, 1], [101, 0]]);
+      else if (sp <= 87) spP = stufe(sp, [[83, 3], [85, 2], [87, 1]]);
+      else if (sp <= 92 || !o2) spP = 0;
+      else spP = stufe(sp, [[94, 1], [96, 2], [101, 3]]);
+      var teile = [
+        ['Atemfrequenz', af ? stufe(af, [[8, 3], [11, 1], [20, 0], [24, 2], [999, 3]]) : 0],
+        ['SpO₂', sp ? spP : 0],
+        ['Sauerstoff', o2 ? 2 : 0],
+        ['RR systolisch', rr ? stufe(rr, [[90, 3], [100, 2], [110, 1], [219, 0], [999, 3]]) : 0],
+        ['Puls', hf ? stufe(hf, [[40, 3], [50, 1], [90, 0], [110, 1], [130, 2], [999, 3]]) : 0],
+        ['Bewusstsein', +$('#nB').value],
+        ['Temperatur', t ? stufe(t, [[35.0, 3], [36.0, 1], [38.0, 0], [39.0, 1], [99, 2]]) : 0]
+      ];
+      var sum = teile.reduce(function (a, x) { return a + x[1]; }, 0), drei = teile.some(function (x) { return x[1] === 3; });
+      $('#nErg').textContent = sum;
+      $('#nTxt').innerHTML = sum >= 7 ? '<span class="chip rot">Hoch – Notfall, Notarzt</span>' : sum >= 5 ? '<span class="chip rot">Mittel – dringende ärztliche Abklärung</span>' : drei ? '<span class="chip warn">Niedrig, aber 3 in einem Wert – dringend prüfen</span>' : '<span class="chip ok">Niedrig</span>';
+      $('#nDetail').innerHTML = teile.map(function (x) { return '<div class="akr-zeile"><span class="akr-b">' + x[1] + '</span><span>' + x[0] + '</span></div>'; }).join('');
+    }
     function kind() {
       var a = Math.min(10, Math.max(1, +$('#kAlter').value || 1)), kg = (a + 4) * 2;
       var z = [['Geschätztes Gewicht', kg + ' kg'], ['Adrenalin CPR (10 µg/kg)', (kg * 0.01).toFixed(2).replace('.', ',') + ' mg = ' + (kg * 0.1).toFixed(1).replace('.', ',') + ' ml (1 mg auf 10 ml)'],
@@ -661,7 +697,9 @@
     $('#siHF').oninput = si; $('#siRR').oninput = si;
     ['#q1', '#q2', '#q3'].forEach(function (x) { $(x).onchange = q; });
     $('#kAlter').oninput = kind;
-    gcs(); si(); q(); kind();
+    ['#nAF', '#nSpO2', '#nRR', '#nHF', '#nT'].forEach(function (x) { $(x).oninput = news; });
+    ['#nB', '#nO2', '#nSkala2'].forEach(function (x) { $(x).onchange = news; });
+    gcs(); si(); q(); news(); kind();
   };
 
 

@@ -12,7 +12,7 @@ Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite
 - **EKG:** 19 präklinisch wichtige Rhythmen als berechnete Streifen plus EKG-Trainer
 - **Medikamente:** 44 Wirkstoffe, die 18 aus der Lernsession sind markiert
 - **Fallbeispiele:** 15 Fälle zum schrittweisen Aufdecken, mit Muster-Übergabe
-- **Rechner:** GCS, Schockindex, qSOFA, Kinder-Notfalldosen
+- **Rechner:** GCS, Schockindex, qSOFA, NEWS2, Kinder-Notfalldosen
 - **Akronyme:** 40 Merkschemata und Abkürzungen (SINNHAFT, SAMPLERS, AVPU, xABCDE, 4 H/HITS, NRettDG, NPsychKG …) mit Karten und Quiz
 
 Der Fortschritt wird nur lokal im Browser gespeichert (`localStorage`).
