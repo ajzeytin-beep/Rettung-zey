@@ -134,7 +134,7 @@
     ['faelle', 'Fallbeispiele', 'faelle'], ['training', 'Übergabe & Protokoll', 'training'], ['rechner', 'Rechner & Scores', 'rechner']
   ];
   var TABS = [['start', 'Start', 'start'], ['lernen', 'Lernen', 'lernen'], ['karten', 'Karten', 'karten'], ['quiz', 'Quiz', 'quiz'], ['mehr', 'Mehr', 'mehr']];
-  var BEREICH = { modul: 'lernen', medi: 'medis', fall: 'faelle', ekgtrainer: 'ekg', pruefung: 'quiz', schwaechen: 'quiz', statistik: 'start', uebergabe: 'training', protokoll: 'training' };
+  var BEREICH = { modul: 'lernen', medi: 'medis', fall: 'faelle', fallfehler: 'faelle', ekgtrainer: 'ekg', pruefung: 'quiz', schwaechen: 'quiz', statistik: 'start', uebergabe: 'training', protokoll: 'training' };
 
   function gehe(token) { if (location.hash.slice(1) === token) render(); else location.hash = token; }
   window.addEventListener('hashchange', function () { render(); window.scrollTo(0, 0); });
@@ -579,14 +579,14 @@
     var kats = ['Alle'];
     RS.faelle.forEach(function (f) { if (kats.indexOf(f.kat) < 0) kats.push(f.kat); });
     var erledigt = RS.faelle.filter(function (f) { return S.faelle[f.id]; }).length;
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.faelle.length + ' Fälle · ' + erledigt + ' bearbeitet</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage, überlege deine Antwort und decke dann die Musterlösung auf.</p></div>' +
-      '<button class="btn" id="zufallsfall">' + ico('faelle') + 'Zufälliger Fall</button></div>' +
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.faelle.length + ' Fälle · ' + erledigt + ' bearbeitet</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage und entscheide Schritt für Schritt zwischen zwei Möglichkeiten. Am Ende siehst du deine Fehler und kannst sie gezielt üben.</p></div>' +
+      '<div class="reihe"><button class="btn" id="zufallsfall">' + ico('faelle') + 'Zufälliger Fall</button><button class="btn zweit" data-gehe="fallfehler">Fehler üben (' + fallFehlerListe().length + ')</button></div></div>' +
       '<div class="filter" id="fallfilter">' + kats.map(function (k, i) { return '<button' + (i ? '' : ' class="aktiv"') + ' data-k="' + esc(k) + '">' + esc(k) + '</button>'; }).join('') + '</div>' +
       '<div class="raster" id="fallliste"></div>';
     function liste(kat) {
       $('#fallliste').innerHTML = RS.faelle.filter(function (f) { return kat === 'Alle' || f.kat === kat; }).map(function (f) {
         var s = S.faelle[f.id];
-        return '<button class="feld modul-karte" data-gehe="fall-' + f.id + '"><div class="reihe"><span class="chip">' + esc(f.kat) + '</span>' + (s ? '<span class="chip ok">bearbeitet</span>' : '') + '</div><h3>' + esc(f.titel) + '</h3><p>' + esc(f.lage) + '</p></button>';
+        return '<button class="feld modul-karte" data-gehe="fall-' + f.id + '"><div class="reihe"><span class="chip">' + esc(f.kat) + '</span>' + (s ? (s.n ? '<span class="chip ' + (s.falsch && s.falsch.length ? 'warn' : 'ok') + '">' + s.richtig + '/' + s.n + ' richtig</span>' : '<span class="chip ok">bearbeitet</span>') : '') + '</div><h3>' + esc(f.titel) + '</h3><p>' + esc(f.lage) + '</p></button>';
       }).join('');
     }
     liste('Alle');
@@ -601,33 +601,115 @@
       gehe('fall-' + pool[Math.floor(Math.random() * pool.length)].id);
     };
   };
+  function fallFehlerListe() {
+    var l = [];
+    RS.faelle.forEach(function (f) { var s = S.faelle[f.id]; if (s && s.falsch) s.falsch.forEach(function (i) { l.push({ f: f, i: i }); }); });
+    return l;
+  }
+  function optionen(f, i) {
+    var e = RS.entscheidungen[f.id][i];
+    return mischen([{ t: e[0], ok: true }, { t: e[1], ok: false }]);
+  }
+  function entscheidungsBox(f, i, nr, gesamt) {
+    var s = f.schritte[i], ops = optionen(f, i);
+    return { ops: ops, html: '<section class="feld schritt"><span class="schritt-nr">Schritt ' + nr + ' von ' + gesamt + '</span><p><strong>' + md(s.q) + '</strong></p>' +
+      '<div class="antworten">' + ops.map(function (o, j) { return '<button class="antwort" data-o="' + j + '"><span class="bst">' + 'AB'[j] + '</span><span>' + md(o.t) + '</span></button>'; }).join('') + '</div></section>' };
+  }
+  function erledigterSchritt(f, i, nr, wahl) {
+    var s = f.schritte[i], e = RS.entscheidungen[f.id][i], ok = wahl.ok;
+    return '<section class="feld schritt"><span class="schritt-nr">Schritt ' + nr + '</span><p><strong>' + md(s.q) + '</strong></p>' +
+      '<div class="antwort ' + (ok ? 'richtig' : 'falsch') + '" style="cursor:default"><span class="bst">' + (ok ? '✓' : '✗') + '</span><span>' + md(wahl.t) + '</span></div>' +
+      (ok ? '' : '<div class="antwort richtig" style="cursor:default"><span class="bst">✓</span><span>' + md(e[0]) + '</span></div>') +
+      '<div class="loesung">' + md(s.a) + '</div></section>';
+  }
+
   VIEWS.fall = function (v, id) {
     var f = RS.faelle.find(function (x) { return x.id === id; });
     if (!f) return VIEWS.faelle(v);
-    var offen = 0;
+    var reihe, pos, wahlen, ops, nurFehler;
+    function start(indizes) {
+      nurFehler = !!indizes;
+      reihe = indizes || f.schritte.map(function (_, i) { return i; });
+      pos = 0; wahlen = []; zeichne();
+    }
     function zeichne() {
       var werte = Object.keys(f.werte);
-      v.innerHTML = zurueck('faelle', 'Fallbeispiele') +
-        '<div class="kopf"><div class="stapel"><span class="label">' + esc(f.kat) + '</span><h1>' + esc(f.titel) + '</h1></div><span class="chip">' + offen + '/' + f.schritte.length + ' aufgedeckt</span></div>' +
+      var html = zurueck('faelle', 'Fallbeispiele') +
+        '<div class="kopf"><div class="stapel"><span class="label">' + esc(f.kat) + (nurFehler ? ' · Fehler üben' : '') + '</span><h1>' + esc(f.titel) + '</h1></div><span class="chip">' + Math.min(pos, reihe.length) + '/' + reihe.length + ' entschieden</span></div>' +
         '<section class="feld stapel"><span class="label">Lage</span><p>' + md(f.lage) + '</p>' +
-          (werte.length ? '<div class="werte">' + werte.map(function (k) { return '<div class="wert"><span>' + esc(k.replace('SpO2', 'SpO₂')) + '</span><b>' + esc(f.werte[k]) + '</b></div>'; }).join('') + '</div>' : '') + '</section>' +
-        f.schritte.map(function (s, i) {
-          if (i > offen) return '';
-          return '<section class="feld schritt"><span class="schritt-nr">Schritt ' + (i + 1) + '</span><p><strong>' + md(s.q) + '</strong></p>' +
-            (i < offen ? '<div class="loesung">' + md(s.a) + '</div>' : '<button class="btn" id="aufdecken" style="align-self:flex-start">Lösung aufdecken</button>') + '</section>';
-        }).join('') +
-        (offen >= f.schritte.length ?
-          '<section class="feld stapel"><span class="label">Verdachtsdiagnose</span><h2>' + esc(f.diagnose) + '</h2>' +
-            (f.fehler.length ? '<div class="stapel" style="gap:6px"><span class="label">Typische Fehler</span><ul class="punkte">' + f.fehler.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div>' : '') +
-            (f.uebergabe ? '<div class="feld-2 stapel"><span class="label">Muster-Übergabe (SINNHAFT)</span><p class="uebergabe">' + md(f.uebergabe) + '</p></div>' : '') +
-            '<div class="reihe"><button class="btn" id="naechsterFall">Nächster Fall</button><button class="btn zweit" data-gehe="uebergabe-' + f.id + '">' + ico('training') + 'Übergabe üben</button><button class="btn zweit" data-gehe="protokoll-' + f.id + '">Protokoll schreiben</button><button class="btn zweit" id="neuStart">Neu beginnen</button></div></section>' : '');
-      var a = $('#aufdecken');
-      if (a) a.onclick = function () { offen++; if (offen >= f.schritte.length) { S.faelle[f.id] = { done: Date.now() }; heuteZaehlen('faelle'); speichern(); } zeichne(); };
-      if ($('#naechsterFall')) {
-        var idx = RS.faelle.indexOf(f);
-        $('#naechsterFall').onclick = function () { gehe('fall-' + RS.faelle[(idx + 1) % RS.faelle.length].id); };
-        $('#neuStart').onclick = function () { offen = 0; zeichne(); };
+          (werte.length ? '<div class="werte">' + werte.map(function (k) { return '<div class="wert"><span>' + esc(k.replace('SpO2', 'SpO₂')) + '</span><b>' + esc(f.werte[k]) + '</b></div>'; }).join('') + '</div>' : '') + '</section>';
+      for (var j = 0; j < pos; j++) html += erledigterSchritt(f, reihe[j], j + 1, wahlen[j]);
+      if (pos < reihe.length) {
+        var box = entscheidungsBox(f, reihe[pos], pos + 1, reihe.length);
+        ops = box.ops; html += box.html;
+      } else html += ende();
+      v.innerHTML = html;
+      v.querySelectorAll('[data-o]').forEach(function (b) {
+        b.onclick = function () { wahlen.push(ops[+b.getAttribute('data-o')]); pos++; if (pos >= reihe.length) speichereErgebnis(); zeichne(); };
+      });
+      if ($('#nochmalFehler')) $('#nochmalFehler').onclick = function () { start(fehlerIdx()); window.scrollTo(0, 0); };
+      if ($('#neuStart')) $('#neuStart').onclick = function () { start(); window.scrollTo(0, 0); };
+      if ($('#naechsterFall')) { var idx = RS.faelle.indexOf(f); $('#naechsterFall').onclick = function () { gehe('fall-' + RS.faelle[(idx + 1) % RS.faelle.length].id); }; }
+      if (pos > 0 && pos < reihe.length) { var akt = v.querySelectorAll('.schritt'); akt[akt.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+    function fehlerIdx() { return reihe.filter(function (_, j) { return !wahlen[j].ok; }); }
+    function speichereErgebnis() {
+      var alt = S.faelle[f.id] || {};
+      var falsch = fehlerIdx();
+      if (nurFehler) {
+        var rest = (alt.falsch || []).filter(function (i) { return falsch.indexOf(i) >= 0 || reihe.indexOf(i) < 0; });
+        S.faelle[f.id] = Object.assign({}, alt, { falsch: rest, done: Date.now() });
+      } else {
+        S.faelle[f.id] = { done: Date.now(), richtig: reihe.length - falsch.length, n: reihe.length, falsch: falsch };
+        heuteZaehlen('faelle');
       }
+      speichern();
+    }
+    function ende() {
+      var falsch = fehlerIdx(), r = reihe.length - falsch.length;
+      return '<section class="feld stapel"><span class="label">Ergebnis</span><div class="reihe"><span class="ergebnis-zahl">' + r + '/' + reihe.length + '</span><span class="chip ' + (falsch.length ? 'rot' : 'ok') + '">' + (falsch.length ? falsch.length + ' falsche Entscheidung' + (falsch.length > 1 ? 'en' : '') : 'Alles richtig') + '</span></div>' +
+        '<span class="label">Verdachtsdiagnose</span><h2>' + esc(f.diagnose) + '</h2>' +
+        (falsch.length ? '<div class="stapel" style="gap:8px"><span class="label">Das solltest du dir merken</span>' + falsch.map(function (i) {
+          return '<div class="feld-2 stapel" style="gap:6px"><strong>' + md(f.schritte[i].q) + '</strong><span>Richtig: <strong>' + md(RS.entscheidungen[f.id][i][0]) + '</strong></span><span class="muted" style="font-size:.9rem">' + md(f.schritte[i].a) + '</span></div>';
+        }).join('') + '</div>' : '') +
+        (f.fehler.length ? '<div class="stapel" style="gap:6px"><span class="label">Typische Fehler in diesem Fall</span><ul class="punkte">' + f.fehler.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</ul></div>' : '') +
+        (f.uebergabe ? '<div class="feld-2 stapel"><span class="label">Muster-Übergabe (SINNHAFT)</span><p class="uebergabe">' + md(f.uebergabe) + '</p></div>' : '') +
+        '<div class="reihe">' + (falsch.length ? '<button class="btn" id="nochmalFehler">Falsche Schritte nochmal</button>' : '') +
+        '<button class="btn' + (falsch.length ? ' zweit' : '') + '" id="naechsterFall">Nächster Fall</button>' +
+        '<button class="btn zweit" data-gehe="uebergabe-' + f.id + '">' + ico('training') + 'Übergabe üben</button>' +
+        '<button class="btn zweit" data-gehe="protokoll-' + f.id + '">Protokoll schreiben</button>' +
+        '<button class="btn zweit" id="neuStart">Ganzen Fall neu</button></div></section>';
+    }
+    start();
+  };
+
+  // Alle falschen Entscheidungen aus allen Fällen nacheinander üben
+  VIEWS.fallfehler = function (v) {
+    var liste = mischen(fallFehlerListe()), pos = 0, richtig = 0, ops;
+    function zeichne(feedback) {
+      if (!liste.length) {
+        v.innerHTML = zurueck('faelle', 'Fallbeispiele') + '<div class="feld stapel"><h2>Keine offenen Fehler</h2><p class="muted">Du hast in den bearbeiteten Fällen keine falschen Entscheidungen offen. Bearbeite weitere Fälle oder starte einen Zufallsfall.</p><button class="btn" data-gehe="faelle" style="align-self:flex-start">Zu den Fällen</button></div>';
+        return;
+      }
+      if (pos >= liste.length) {
+        v.innerHTML = zurueck('faelle', 'Fallbeispiele') + '<div class="feld stapel"><span class="label">Fehler üben</span><div class="ergebnis-zahl">' + richtig + '/' + liste.length + '</div><p class="muted">Richtig beantwortete Schritte sind aus deiner Fehlerliste entfernt.</p><div class="reihe"><button class="btn" data-gehe="fallfehler">Restliche Fehler üben (' + fallFehlerListe().length + ')</button><button class="btn zweit" data-gehe="faelle">Zu den Fällen</button></div></div>';
+        return;
+      }
+      var x = liste[pos], f = x.f, box = entscheidungsBox(f, x.i, pos + 1, liste.length);
+      ops = box.ops;
+      v.innerHTML = zurueck('faelle', 'Fallbeispiele') + '<div class="stapel" style="gap:4px"><span class="label">Fehler üben · ' + (pos + 1) + ' von ' + liste.length + '</span><h1>' + esc(f.titel) + '</h1></div>' +
+        '<section class="feld stapel"><span class="label">Lage</span><p>' + md(f.lage) + '</p></section>' + (feedback || box.html);
+      if (feedback) { $('#weiterFehler').onclick = function () { pos++; zeichne(); window.scrollTo(0, 0); }; return; }
+      v.querySelectorAll('[data-o]').forEach(function (b) {
+        b.onclick = function () {
+          var w = ops[+b.getAttribute('data-o')];
+          if (w.ok) {
+            richtig++;
+            var s = S.faelle[f.id]; s.falsch = s.falsch.filter(function (i) { return i !== x.i; }); speichern();
+          }
+          zeichne(erledigterSchritt(f, x.i, pos + 1, w) + '<button class="btn" id="weiterFehler" style="align-self:flex-start">Weiter</button>');
+        };
+      });
     }
     zeichne();
   };

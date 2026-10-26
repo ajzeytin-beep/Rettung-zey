@@ -11,7 +11,7 @@ Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite
 - **Karteikarten** mit Lernkartei-System (Leitner)
 - **EKG:** 19 präklinisch wichtige Rhythmen als berechnete Streifen plus EKG-Trainer
 - **Medikamente:** 44 Wirkstoffe, die 18 aus der Lernsession sind markiert
-- **Fallbeispiele:** 52 Fälle, davon 16 typische N-KTW-Einsätze aus Niedersachsen/Ostfriesland, zum schrittweisen Aufdecken (Internistik, Trauma, Neuro, Psychiatrie, Pädiatrie, Geburt, MANV, Recht), Filter und Zufallsfall
+- **Fallbeispiele:** 52 Fälle, davon 16 typische N-KTW-Einsätze aus Niedersachsen/Ostfriesland, mit Entscheidungen Schritt für Schritt (richtig oder falsch), Fehler-Auswertung und „Fehler üben“ (Internistik, Trauma, Neuro, Psychiatrie, Pädiatrie, Geburt, MANV, Recht), Filter und Zufallsfall
 - **Übergabe-Trainer:** Übergabe nach SINNHAFT schreiben, App prüft Vollständigkeit und Zahlen
 - **Protokoll-Übung:** vereinfachtes Einsatzprotokoll zu einem Fall ausfüllen und mit der Musterlösung vergleichen
 - **Rechner:** GCS, Schockindex, qSOFA, NEWS2, Kinder-Notfalldosen

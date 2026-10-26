@@ -1,9 +1,9 @@
 // Offline-Cache für „Lernen mit Rettung ZTN“. Bei Änderungen VERSION erhöhen.
-const VERSION = 'rsplus-v3';
+const VERSION = 'rsplus-v4';
 const DATEIEN = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/fonts.css', './js/app.js',
   './js/data/akronyme.js', './js/data/module.js', './js/data/fragen.js', './js/data/medikamente.js',
-  './js/data/faelle.js', './js/data/ekg.js',
+  './js/data/faelle.js', './js/data/entscheidungen.js', './js/data/ekg.js',
   './fonts/barlow-condensed-latin-600-normal.woff2', './fonts/barlow-condensed-latin-700-normal.woff2', './fonts/ibm-plex-sans-latin-400-normal.woff2', './fonts/ibm-plex-sans-latin-500-normal.woff2', './fonts/ibm-plex-sans-latin-600-normal.woff2', './fonts/jetbrains-mono-latin-500-normal.woff2', './fonts/jetbrains-mono-latin-700-normal.woff2',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'
 ];
