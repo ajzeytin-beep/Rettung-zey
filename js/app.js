@@ -573,11 +573,30 @@
 
   // ---------- Fallbeispiele ----------
   VIEWS.faelle = function (v) {
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Üben am Fall</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage, überlege deine Antwort und decke dann die Musterlösung auf.</p></div></div>' +
-      '<div class="raster">' + RS.faelle.map(function (f) {
+    var kats = ['Alle'];
+    RS.faelle.forEach(function (f) { if (kats.indexOf(f.kat) < 0) kats.push(f.kat); });
+    var erledigt = RS.faelle.filter(function (f) { return S.faelle[f.id]; }).length;
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + RS.faelle.length + ' Fälle · ' + erledigt + ' bearbeitet</span><h1>Fallbeispiele</h1><p class="muted">Lies die Lage, überlege deine Antwort und decke dann die Musterlösung auf.</p></div>' +
+      '<button class="btn" id="zufallsfall">' + ico('faelle') + 'Zufälliger Fall</button></div>' +
+      '<div class="filter" id="fallfilter">' + kats.map(function (k, i) { return '<button' + (i ? '' : ' class="aktiv"') + ' data-k="' + esc(k) + '">' + esc(k) + '</button>'; }).join('') + '</div>' +
+      '<div class="raster" id="fallliste"></div>';
+    function liste(kat) {
+      $('#fallliste').innerHTML = RS.faelle.filter(function (f) { return kat === 'Alle' || f.kat === kat; }).map(function (f) {
         var s = S.faelle[f.id];
         return '<button class="feld modul-karte" data-gehe="fall-' + f.id + '"><div class="reihe"><span class="chip">' + esc(f.kat) + '</span>' + (s ? '<span class="chip ok">bearbeitet</span>' : '') + '</div><h3>' + esc(f.titel) + '</h3><p>' + esc(f.lage) + '</p></button>';
-      }).join('') + '</div>';
+      }).join('');
+    }
+    liste('Alle');
+    $('#fallfilter').onclick = function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      $('#fallfilter').querySelectorAll('button').forEach(function (x) { x.classList.toggle('aktiv', x === b); });
+      liste(b.getAttribute('data-k'));
+    };
+    $('#zufallsfall').onclick = function () {
+      var offen = RS.faelle.filter(function (f) { return !S.faelle[f.id]; });
+      var pool = offen.length ? offen : RS.faelle;
+      gehe('fall-' + pool[Math.floor(Math.random() * pool.length)].id);
+    };
   };
   VIEWS.fall = function (v, id) {
     var f = RS.faelle.find(function (x) { return x.id === id; });
