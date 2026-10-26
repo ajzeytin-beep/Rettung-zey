@@ -26,7 +26,7 @@ Dafür muss sie über **https** erreichbar sein, z. B. mit GitHub Pages:
 
 1. Repository → **Settings → Pages**
 2. *Source*: **Deploy from a branch**, Branch `claude/rettsan-plus-lernapp` (bzw. `main`), Ordner `/ (root)` → **Save**
-3. Nach 1–2 Minuten ist die App unter `https://<benutzername>.github.io/Rettung-zey/` erreichbar.
+3. Nach 1–2 Minuten ist die App unter **https://ajzeytin-beep.github.io/Rettung-zey/** erreichbar.
 4. Auf dem Handy öffnen → iPhone: Safari → Teilen → „Zum Home-Bildschirm“; Android: Chrome → Menü → „App installieren“.
 
 Hinweis: GitHub Pages für **private** Repositories braucht GitHub Pro. Alternativ das Repository öffentlich stellen
