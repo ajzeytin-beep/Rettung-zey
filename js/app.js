@@ -229,7 +229,7 @@
         '<button class="btn aktion" data-gehe="pruefung">' + ico('pruefung') + 'Prüfung simulieren<small>40 Fragen · 45 Minuten</small></button>' +
         '<button class="btn aktion" data-gehe="karten-faellig">' + ico('karten') + 'Karteikarten<small>' + g.faellig + ' fällig</small></button>' +
         '<button class="btn aktion" data-gehe="ekgtrainer">' + ico('ekg') + 'EKG-Trainer<small>' + RS.rhythmen.length + ' Rhythmen erkennen</small></button>' +
-        '<button class="btn aktion" data-gehe="schwaechen">' + ico('ziel') + 'Schwächen üben<small>' + schwaechen().length + ' offene Fehler</small></button>' +
+        '<button class="btn aktion" data-gehe="schwaechen">' + ico('ziel') + 'Fehler üben<small>' + schwaechen().length + ' offene Quizfehler · ' + fallFehlerListe().length + ' Fallfehler</small></button>' +
       '</section>' +
       '<section class="raster-2">' +
         '<div class="feld stapel"><div class="kopf"><div class="stapel"><span class="label">Akronym des Tages</span><h2>' + esc(akr.name) + '</h2></div><button class="btn zweit klein" data-gehe="akronyme">Alle Akronyme</button></div>' +
@@ -262,7 +262,7 @@
     var extra = id === 'ekg' ? '<button class="btn zweit" data-gehe="ekg">' + ico('ekg') + 'Rhythmen ansehen</button>' : '';
     v.innerHTML = zurueck('lernen', 'Lernmodule') +
       '<div class="kopf"><div class="stapel"><span class="label">Lernmodul</span><h1>' + esc(m.titel) + '</h1><p class="muted">' + esc(m.kurz) + '</p></div>' +
-      '<div class="reihe"><button class="btn" data-gehe="quiz-' + id + '">' + ico('quiz') + 'Quiz (' + s.fragen + ')</button><button class="btn zweit" data-gehe="karten-' + id + '">' + ico('karten') + 'Karten (' + s.karten + ')</button>' + extra + '</div></div>' +
+      '<div class="reihe"><button class="btn" data-gehe="quiz-' + id + '">' + ico('quiz') + 'Quiz (' + s.fragen + ')</button>' + (schwaechen(id).length ? '<button class="btn zweit" data-gehe="schwaechen-' + id + '">' + ico('ziel') + 'Fehler (' + schwaechen(id).length + ')</button>' : '') + '<button class="btn zweit" data-gehe="karten-' + id + '">' + ico('karten') + 'Karten (' + s.karten + ')</button>' + extra + '</div></div>' +
       m.abschnitte.map(function (a) {
         var body = a.tabelle ? tabelle(a.tabelle) : '<ul class="punkte">' + a.p.map(function (p) { return '<li>' + md(p) + '</li>'; }).join('') + '</ul>';
         return '<section class="feld abschnitt"><h3>' + esc(a.h) + '</h3>' + body + '</section>';
@@ -278,7 +278,7 @@
 
   // ---------- Quiz ----------
   var Q = null; // laufende Sitzung
-  function schwaechen() { return RS.fragen.filter(function (q) { var s = S.fragen[q.id]; return s && !s.letzte; }); }
+  function schwaechen(modul) { return RS.fragen.filter(function (q) { var s = S.fragen[q.id]; return s && !s.letzte && (!modul || q.m === modul); }); }
 
   VIEWS.quiz = function (v, arg) {
     if (arg) {
@@ -294,8 +294,16 @@
           (verlauf.length ? '<div class="stapel"><span class="label">Letzte Versuche</span>' + verlauf.map(function (p) { return '<div class="reihe" style="justify-content:space-between"><span class="mono muted">' + esc(p.datum) + '</span><span class="chip ' + (p.pct >= 70 ? 'ok' : 'rot') + '">' + p.richtig + '/' + p.n + ' · ' + p.pct + ' %</span></div>'; }).join('') + '</div>' : '') +
         '</div>' +
         '<div class="feld stapel"><h2>Gezielt üben</h2><p class="muted">Sofortige Rückmeldung mit Erklärung nach jeder Frage.</p>' +
-          '<div class="reihe"><button class="btn" data-gehe="quiz-alle">Alle ' + RS.fragen.length + ' Fragen</button><button class="btn zweit" data-gehe="schwaechen">Schwächen (' + schwaechen().length + ')</button></div></div>' +
+          '<div class="reihe"><button class="btn" data-gehe="quiz-alle">Alle ' + RS.fragen.length + ' Fragen</button><button class="btn zweit" data-gehe="schwaechen">' + ico('ziel') + 'Fehler üben (' + schwaechen().length + ')</button></div>' +
+          '<p class="hinweis">Fehler üben: Falsch beantwortete Fragen kommen so lange wieder, bis du sie richtig hast.</p></div>' +
       '</section>' +
+      (function () {
+        var mitFehlern = ids.filter(function (id) { return schwaechen(id).length; });
+        return mitFehlern.length ? '<section class="feld stapel"><h2>Offene Fehler nach Thema</h2><div class="modul-liste">' + mitFehlern.map(function (id) {
+          var n = schwaechen(id).length;
+          return '<button class="modul-zeile" data-gehe="schwaechen-' + id + '"><span>' + esc(modulName(id)) + '</span><span></span><span class="chip rot">' + n + '</span></button>';
+        }).join('') + '</div></section>' : '';
+      })() +
       '<section class="feld stapel"><h2>Nach Thema</h2><div class="modul-liste">' + ids.map(function (id) {
         var s = modulStand(id);
         return '<button class="modul-zeile" data-gehe="quiz-' + id + '"><span>' + esc(modulName(id)) + ' <span class="muted">· ' + s.fragen + '</span></span>' + balken(pct(s.fragenOk, s.fragen), s.fragenOk === s.fragen && s.fragen > 0) + '<span class="pct">' + s.fragenOk + '/' + s.fragen + '</span></button>';
@@ -304,13 +312,13 @@
   VIEWS.pruefung = function (v) {
     starteQuiz(v, mischen(RS.fragen).slice(0, 40), { titel: 'Prüfungssimulation', modus: 'pruefung', zeit: 45 * 60, zurueck: 'quiz' });
   };
-  VIEWS.schwaechen = function (v) {
-    var s = schwaechen();
+  VIEWS.schwaechen = function (v, modul) {
+    var s = schwaechen(modul || null);
     if (!s.length) {
-      v.innerHTML = zurueck('quiz', 'Quiz') + '<div class="feld stapel"><h2>Keine offenen Fehler</h2><p class="muted">Alle Fragen, die du bisher beantwortet hast, sind beim letzten Versuch richtig gewesen. Starte ein Quiz, um neue Fragen zu bearbeiten.</p><button class="btn" data-gehe="quiz-alle" style="align-self:flex-start">Alle Fragen üben</button></div>';
+      v.innerHTML = zurueck('quiz', 'Quiz') + '<div class="feld stapel"><h2>Keine offenen Fehler</h2><p class="muted">Alle Fragen' + (modul ? ' in „' + esc(modulName(modul)) + '“' : '') + ', die du bisher beantwortet hast, waren beim letzten Versuch richtig. Starte ein Quiz, um neue Fragen zu bearbeiten.</p><button class="btn" data-gehe="quiz-' + (modul || 'alle') + '" style="align-self:flex-start">Fragen üben</button></div>';
       return;
     }
-    starteQuiz(v, mischen(s), { titel: 'Schwächen üben', modus: 'uebung', zurueck: 'quiz' });
+    starteQuiz(v, mischen(s), { titel: 'Fehler üben' + (modul ? ' · ' + modulName(modul) : ''), modus: 'uebung', wiederholen: true, zurueck: 'quiz' });
   };
 
   function starteQuiz(v, fragen, opt) {
@@ -335,7 +343,7 @@
       return '<span class="' + c + '"></span>';
     }).join('') + '</div>';
     v.innerHTML = zurueck(Q.opt.zurueck, 'Beenden') +
-      '<div class="quiz-kopf"><div class="stapel" style="gap:4px"><span class="label">' + esc(Q.opt.titel) + ' · ' + esc(modulName(q.m)) + '</span><h2>Frage ' + (Q.i + 1) + ' von ' + n + '</h2></div>' +
+      '<div class="quiz-kopf"><div class="stapel" style="gap:4px"><span class="label">' + esc(Q.opt.titel) + ' · ' + esc(modulName(q.m)) + '</span><h2>Frage ' + (Q.i + 1) + ' von ' + n + '</h2>' + (x.wdh ? '<span class="chip warn" style="align-self:flex-start">Wiederholung</span>' : '') + '</div>' +
       (Q.ende ? '<span class="timer" id="timer"></span>' : '') + '</div>' + navi +
       '<section class="feld stapel"><p class="frage">' + md(q.f) + '</p><div class="antworten">' +
       x.ord.map(function (ai, j) {
@@ -359,6 +367,7 @@
         if (!pruef && x.wahl !== null) return;
         x.wahl = ai;
         if (!pruef) antwortErfassen(q, ai === q.k);
+        if (Q.opt.wiederholen && ai !== q.k) Q.fragen.push({ q: q, ord: mischen(x.ord), wahl: null, wdh: true });
         zeigeFrage(v);
       };
     });
@@ -378,8 +387,10 @@
     if (timer) { clearInterval(timer); timer = null; }
     if (Q.fertig) return;
     Q.fertig = true;
-    var pruef = Q.opt.modus === 'pruefung', n = Q.fragen.length;
-    var richtig = Q.fragen.filter(function (x) { return x.wahl === x.q.k; }).length;
+    var pruef = Q.opt.modus === 'pruefung';
+    var gesehen = {}, erste = Q.fragen.filter(function (x) { if (gesehen[x.q.id]) return false; gesehen[x.q.id] = 1; return true; });
+    var n = erste.length;
+    var richtig = erste.filter(function (x) { return x.wahl === x.q.k; }).length;
     var p = pct(richtig, n);
     if (pruef) {
       Q.fragen.forEach(function (x) { if (x.wahl !== null) antwortErfassen(x.q, x.wahl === x.q.k); });
@@ -388,23 +399,31 @@
       speichern();
     }
     var nachThema = {};
-    Q.fragen.forEach(function (x) { var t = nachThema[x.q.m] = nachThema[x.q.m] || { n: 0, r: 0 }; t.n++; if (x.wahl === x.q.k) t.r++; });
-    var falsche = Q.fragen.filter(function (x) { return x.wahl !== x.q.k; });
+    erste.forEach(function (x) { var t = nachThema[x.q.m] = nachThema[x.q.m] || { n: 0, r: 0 }; t.n++; if (x.wahl === x.q.k) t.r++; });
+    var falsche = erste.filter(function (x) { return x.wahl !== x.q.k; });
+    var offen = schwaechen().length;
     v.innerHTML = zurueck(Q.opt.zurueck, 'Zurück') +
       '<section class="raster-2"><div class="feld stapel"><span class="label">' + esc(Q.opt.titel) + '</span><div class="ergebnis-zahl">' + p + ' %</div>' +
         '<p>' + richtig + ' von ' + n + ' richtig.</p>' +
         (pruef ? '<span class="chip ' + (p >= 70 ? 'ok' : 'rot') + '" style="align-self:flex-start">' + (p >= 70 ? 'Bestanden (Richtwert 70 %)' : 'Unter 70 % – weiter üben') + '</span><p class="hinweis">Die 70-%-Grenze ist ein Richtwert. Die genaue Bestehensgrenze nennt euch die Schule.</p>' : '') +
-        '<div class="reihe"><button class="btn" id="nochmal">Nochmal</button>' + (falsche.length ? '<button class="btn zweit" data-gehe="schwaechen">Fehler üben</button>' : '') + '</div></div>' +
+        (Q.opt.wiederholen ? '<p class="muted">' + (falsche.length ? falsche.length + ' Frage' + (falsche.length > 1 ? 'n' : '') + ' beim ersten Versuch falsch – inzwischen wiederholt.' : 'Alles beim ersten Versuch richtig.') + '</p>' : '') +
+        '<div class="reihe">' + (falsche.length ? '<button class="btn" id="falscheNochmal">Falsche dieser Runde üben (' + falsche.length + ')</button>' : '') +
+        '<button class="btn' + (falsche.length ? ' zweit' : '') + '" id="nochmal">Ganze Runde nochmal</button>' +
+        (offen ? '<button class="btn zweit" data-gehe="schwaechen">' + ico('ziel') + 'Alle offenen Fehler (' + offen + ')</button>' : '') + '</div></div>' +
       '<div class="feld stapel"><h3>Nach Thema</h3>' + Object.keys(nachThema).map(function (m) {
         var t = nachThema[m]; return '<div class="stapel" style="gap:4px"><div class="reihe" style="justify-content:space-between"><span>' + esc(modulName(m)) + '</span><span class="mono muted">' + t.r + '/' + t.n + '</span></div>' + balken(pct(t.r, t.n), t.r === t.n) + '</div>';
       }).join('') + '</div></section>' +
-      (falsche.length ? '<section class="feld stapel"><h2>Falsch beantwortet</h2>' + falsche.map(function (x) {
+      (falsche.length ? '<section class="feld stapel"><h2>' + (Q.opt.wiederholen ? 'Beim ersten Versuch falsch' : 'Falsch beantwortet') + '</h2>' + falsche.map(function (x) {
         return '<div class="feld-2 stapel" style="gap:6px"><strong>' + md(x.q.f) + '</strong>' +
           (x.wahl !== null ? '<span class="muted">Deine Antwort: ' + md(x.q.a[x.wahl]) + '</span>' : '<span class="muted">Nicht beantwortet</span>') +
           '<span>Richtig: <strong>' + md(x.q.a[x.q.k]) + '</strong></span><span class="muted" style="font-size:.88rem">' + md(x.q.e) + '</span></div>';
       }).join('') + '</section>' : '');
+    if ($('#falscheNochmal')) $('#falscheNochmal').onclick = function () {
+      starteQuiz(v, mischen(falsche.map(function (x) { return x.q; })), { titel: 'Fehler üben', modus: 'uebung', wiederholen: true, zurueck: Q.opt.zurueck });
+      window.scrollTo(0, 0);
+    };
     $('#nochmal').onclick = function () {
-      if (pruef) VIEWS.pruefung(v); else starteQuiz(v, mischen(Q.fragen.map(function (x) { return x.q; })), Q.opt);
+      if (pruef) VIEWS.pruefung(v); else starteQuiz(v, mischen(erste.map(function (x) { return x.q; })), Q.opt);
     };
   }
 

@@ -7,7 +7,7 @@ Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite
 
 - **Dashboard:** Tagesziele, Merksatz und Akronym des Tages, Gesamtfortschritt, Fortschritt je Modul
 - **17 Lernmodule** (Internistik, Trauma nach S3-Leitlinie, EKG, CPR-Pharmakologie, Reanimation Erwachsene/Kinder, Airway, MANV, Adipositas/Dialyse, Neuro/Psych, Deeskalation, Recht u. a.)
-- **Quiz:** rund 300 MC-Fragen mit Erklärung, Prüfungssimulation (40 Fragen, 45 min), „Schwächen üben“
+- **Quiz:** rund 300 MC-Fragen mit Erklärung, Prüfungssimulation (40 Fragen, 45 min), „Fehler üben“ (falsche Fragen kommen wieder, bis sie sitzen)
 - **Karteikarten** mit Lernkartei-System (Leitner)
 - **EKG:** 19 präklinisch wichtige Rhythmen als berechnete Streifen plus EKG-Trainer
 - **Medikamente:** 44 Wirkstoffe, die 18 aus der Lernsession sind markiert

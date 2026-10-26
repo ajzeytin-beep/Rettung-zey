@@ -1,5 +1,5 @@
 // Offline-Cache für „Lernen mit Rettung ZTN“. Bei Änderungen VERSION erhöhen.
-const VERSION = 'rsplus-v4';
+const VERSION = 'rsplus-v5';
 const DATEIEN = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/fonts.css', './js/app.js',
   './js/data/akronyme.js', './js/data/module.js', './js/data/fragen.js', './js/data/medikamente.js',
