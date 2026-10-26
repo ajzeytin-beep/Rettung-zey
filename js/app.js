@@ -30,12 +30,39 @@
     stat: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
   };
   function ico(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + I[n] + '</svg>'; }
-  var KREUZ = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>';
+  var RTW = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.6" width="4" height="1.4" rx=".5" fill="#fff"/>' +
+    '<path fill="#fff" d="M2 6.5h12.5v3h3.8l3.2 3.6V16H2z"/><path fill="var(--red)" d="M15.8 10.6h2.1l1.9 2.2h-4z"/>' +
+    '<path fill="var(--red)" d="M7.2 8.4h1.6V10h1.6v1.6H8.8v1.6H7.2v-1.6H5.6V10h1.6z"/>' +
+    '<circle cx="6.5" cy="16.8" r="2.2" fill="#fff"/><circle cx="17.5" cy="16.8" r="2.2" fill="#fff"/>' +
+    '<circle cx="6.5" cy="16.8" r=".9" fill="var(--red)"/><circle cx="17.5" cy="16.8" r=".9" fill="var(--red)"/></svg>';
+  var MARKE = '<div class="brand"><div class="brand-mark">' + RTW + '</div><div class="brand-name">RS+ Lernapp Zey</div></div>';
+  var MERKSAETZE = [
+    'Amiodaron: „Drei-Hundert nach dem Dritten“ – 300 mg nach dem 3. Schock, 150 mg nach dem 5.',
+    'Kein ASS bei Dissektion, kein Nitro bei Hinterwand oder Potenzmitteln.',
+    'Salbutamol ist das Gaspedal, Ipratropium löst die Bremse.',
+    'GCS ≤ 8 – der Tubus lacht.',
+    'Schnappatmung ist keine Atmung: sofort drücken.',
+    'Geordneter Rhythmus heißt nicht ROSC – erst Puls tasten.',
+    'Lungenödem: CPAP ja. Lungenembolie: CPAP nein.',
+    'Atemnot sitzt, Schock liegt.',
+    'Bewusstseinsstörung: nichts per os.',
+    'Marcumar plus Kopfverletzung = CT.',
+    'Schockindex über 1 = Schock.',
+    'Spritzende Blutung: Tourniquet statt Druckverband – Uhrzeit notieren.',
+    'Hyperventilation ist eine Ausschlussdiagnose.',
+    'Shunt-Arm: kein RR, kein Zugang, keine Stauung.',
+    'Schlaganfall: zuerst fragen, wann zuletzt gesund gesehen.',
+    'Naloxon wirkt kürzer als das Opioid – immer Klinik.',
+    'Eigenschutz vor Fremdschutz.'
+  ];
+  var ZIELE = { fragen: 15, karten: 20, faelle: 1 };
 
   // ---------- Fortschritt ----------
   var KEY = 'rsplus.lernapp.v1';
   var S = laden();
-  function leer() { return { fragen: {}, karten: {}, gelesen: {}, faelle: {}, ekg: { r: 0, f: 0 }, pruefungen: [], tage: [] }; }
+  function leer() { return { fragen: {}, karten: {}, gelesen: {}, faelle: {}, ekg: { r: 0, f: 0 }, pruefungen: [], tage: [], heute: null }; }
+  function heuteStand() { if (!S.heute || S.heute.d !== heuteISO()) S.heute = { d: heuteISO(), fragen: 0, karten: 0, faelle: 0 }; return S.heute; }
+  function heuteZaehlen(feld) { heuteStand()[feld]++; }
   function laden() {
     try { var d = JSON.parse(localStorage.getItem(KEY)); if (d && d.fragen) return Object.assign(leer(), d); } catch (e) {}
     return leer();
@@ -103,9 +130,9 @@
     var tabs = TABS.map(function (n) { return '<button data-gehe="' + n[0] + '" data-nav="' + n[0] + '">' + ico(n[2]) + '<span>' + n[1] + '</span></button>'; }).join('');
     $('#app').innerHTML =
       '<div class="app">' +
-        '<aside class="sidebar"><div class="brand"><div class="brand-mark">' + KREUZ + '</div><div><div class="brand-name">RS Plus</div><div class="brand-sub">Lernapp 3/2026</div></div></div>' + nav +
+        '<aside class="sidebar">' + MARKE + nav +
         '<div class="sidebar-foot">Lernhilfe – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und der Notarzt.</div></aside>' +
-        '<header class="topbar"><div class="brand"><div class="brand-mark">' + KREUZ + '</div><div><div class="brand-name">RS Plus</div><div class="brand-sub">Lernapp 3/2026</div></div></div></header>' +
+        '<header class="topbar">' + MARKE + '</header>' +
         '<main class="main"><div class="inhalt" id="view"></div></main>' +
         '<nav class="bottomnav">' + tabs + '</nav>' +
       '</div>';
@@ -155,13 +182,23 @@
         (zielFuer(e.modul) ? '<button class="btn zweit klein" data-gehe="' + zielFuer(e.modul) + '">Lernen</button>' : '<span></span>') + '</div>';
     }).join('') : '<p class="muted">Der Lehrgang ist abgeschlossen. Wiederholen kannst du trotzdem jederzeit.</p>';
 
+    var h = heuteStand(), jetzt = new Date(), std = jetzt.getHours();
+    var gruss = std < 11 ? 'Moin!' : std < 18 ? 'Weiter geht’s!' : 'Noch eine Runde?';
+    var datumText = jetzt.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    var ziele = [['fragen', 'Fragen', 'quiz-alle'], ['karten', 'Karten', 'karten-faellig'], ['faelle', 'Fall', 'faelle']];
+    var fertig = ziele.filter(function (z) { return h[z[0]] >= ZIELE[z[0]]; }).length;
+    var zielHtml = ziele.map(function (z) {
+      var ist = Math.min(h[z[0]], ZIELE[z[0]]), ok = ist >= ZIELE[z[0]];
+      return '<button class="tagesziel' + (ok ? ' ok' : '') + '" data-gehe="' + z[2] + '"><b class="mono">' + ist + '<span>/' + ZIELE[z[0]] + '</span></b><span>' + z[1] + '</span>' + balken(pct(ist, ZIELE[z[0]]), ok) + '</button>';
+    }).join('');
+    var merksatz = MERKSAETZE[Math.floor(jetzt / 864e5) % MERKSAETZE.length];
     v.innerHTML =
       '<section class="hero">' +
         '<div class="feld hero-text">' +
-          '<div class="stapel"><span class="label">' + esc(RS.lehrgang.name) + ' · ' + esc(RS.lehrgang.ort) + '</span>' +
-          '<h1>Bereit für Freitag?</h1>' +
-          '<p class="muted">Schriftliche MC-Prüfung am 30.10. um 08:30, praktische Prüfung ab 12:45.</p></div>' +
-          '<div class="countdown" id="countdown"></div>' +
+          '<div class="stapel"><span class="label">' + esc(datumText) + '</span>' +
+          '<h1>' + gruss + ' Dein Lernziel für heute</h1>' +
+          '<p class="muted">' + (fertig === 3 ? 'Tagesziel geschafft – alles, was jetzt noch kommt, ist Bonus.' : 'Kleine Portionen, jeden Tag: so bleibt es bis zur Prüfung hängen.') + '</p></div>' +
+          '<div class="tagesziele">' + zielHtml + '</div>' +
         '</div>' +
         '<div class="feld ring-feld">' +
           '<svg class="ring" viewBox="0 0 120 120"><circle class="bahn" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>' +
@@ -171,6 +208,7 @@
           (letzteP ? '<span class="chip ' + (letzteP.pct >= 70 ? 'ok' : 'rot') + '">Letzte Probeprüfung: ' + letzteP.pct + ' %</span>' : '<span class="chip">Noch keine Probeprüfung</span>') + '</div>' +
         '</div>' +
       '</section>' +
+      '<section class="feld merksatz"><span class="label">Merksatz des Tages</span><p>' + esc(merksatz) + '</p></section>' +
       '<section class="kacheln">' +
         kachel(g.beantwortet + '<span class="muted" style="font-size:1rem">/' + RS.fragen.length + '</span>', 'Fragen bearbeitet') +
         kachel(g.quote + ' %', 'Trefferquote') +
@@ -192,15 +230,6 @@
       '</section>' +
       '<p class="hinweis">Diese App ist eine Lernhilfe aus deinen Kursunterlagen. Dosierungen sind Richtwerte für Erwachsene – verbindlich sind eure SOPs, die RS-Plus-Leitlinie und die Freigabe durch den Notarzt.</p>';
 
-    function zeichneCountdown() {
-      var el = $('#countdown'); if (!el) return;
-      var diff = new Date(RS.lehrgang.pruefungMC) - new Date();
-      if (diff <= 0) { el.innerHTML = '<div class="cd"><b>✓</b><span>Prüfung vorbei</span></div>'; return; }
-      var d = Math.floor(diff / 864e5), h = Math.floor(diff / 36e5) % 24, m = Math.floor(diff / 6e4) % 60;
-      el.innerHTML = '<div class="cd"><b>' + d + '</b><span>Tage</span></div><div class="cd"><b>' + h + '</b><span>Stunden</span></div><div class="cd"><b>' + m + '</b><span>Minuten</span></div>';
-    }
-    zeichneCountdown();
-    timer = setInterval(zeichneCountdown, 30000);
   };
   function kachel(wert, label) { return '<div class="feld kachel"><b>' + wert + '</b><span class="label">' + label + '</span></div>'; }
   function zielFuer(modul) {
@@ -291,7 +320,7 @@
   function antwortErfassen(q, richtig) {
     var s = S.fragen[q.id] || { r: 0, f: 0 };
     if (richtig) s.r++; else s.f++;
-    s.letzte = richtig; S.fragen[q.id] = s; speichern();
+    s.letzte = richtig; S.fragen[q.id] = s; heuteZaehlen('fragen'); speichern();
   }
   function zeigeFrage(v) {
     if (timer) { clearInterval(timer); timer = null; }
@@ -430,7 +459,7 @@
         if (wert === 0) { s.box = 1; s.due = Date.now() + 60e3; K.deck.push(k); }
         else if (wert === 1) { s.box = Math.max(1, s.box); s.due = Date.now() + INTERVALL[1]; }
         else { s.box = Math.min(5, s.box + 1); s.due = Date.now() + INTERVALL[s.box]; K.gewusst++; }
-        S.karten[k.key] = s; speichern();
+        S.karten[k.key] = s; heuteZaehlen('karten'); speichern();
         K.i++; zeigeKarte(v);
       };
     });
@@ -571,7 +600,7 @@
             (f.uebergabe ? '<div class="feld-2 stapel"><span class="label">Muster-Übergabe (SINNHAFT)</span><p class="uebergabe">' + md(f.uebergabe) + '</p></div>' : '') +
             '<div class="reihe"><button class="btn" id="naechsterFall">Nächster Fall</button><button class="btn zweit" id="neuStart">Neu beginnen</button></div></section>' : '');
       var a = $('#aufdecken');
-      if (a) a.onclick = function () { offen++; if (offen >= f.schritte.length) { S.faelle[f.id] = { done: Date.now() }; speichern(); } zeichne(); };
+      if (a) a.onclick = function () { offen++; if (offen >= f.schritte.length) { S.faelle[f.id] = { done: Date.now() }; heuteZaehlen('faelle'); speichern(); } zeichne(); };
       if ($('#naechsterFall')) {
         var idx = RS.faelle.indexOf(f);
         $('#naechsterFall').onclick = function () { gehe('fall-' + RS.faelle[(idx + 1) % RS.faelle.length].id); };
@@ -638,7 +667,7 @@
   // ---------- Stundenplan ----------
   VIEWS.plan = function (v) {
     var heute = heuteISO();
-    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">' + esc(RS.lehrgang.ort) + '</span><h1>Stundenplan</h1><p class="muted">Tippe auf eine Einheit, um das passende Modul zu öffnen.</p></div>' +
+    v.innerHTML = '<div class="kopf"><div class="stapel"><span class="label">Kurswoche 26.–30.10.</span><h1>Stundenplan</h1><p class="muted">Tippe auf eine Einheit, um das passende Modul zu öffnen.</p></div>' +
       '<div class="reihe"><span class="chip">T Theorie</span><span class="chip warn">P Praxis</span><span class="chip rot">X Prüfung</span></div></div>' +
       '<div class="tag-spalten">' + RS.stundenplan.map(function (d) {
         return '<div class="feld tag-spalte' + (d.datum === heute ? ' heute' : '') + '"><div class="reihe" style="justify-content:space-between"><h3>' + esc(d.tag) + '</h3><span class="mono muted">' + d.datum.split('-').reverse().slice(0, 2).join('.') + '.</span></div>' +

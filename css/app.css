@@ -52,10 +52,10 @@ p { margin: 0; }
 }
 .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
 .brand-mark {
-  width: 34px; height: 34px; border-radius: 8px; background: var(--red);
+  width: 40px; height: 40px; border-radius: 9px; background: var(--red);
   display: grid; place-items: center; flex: none;
 }
-.brand-mark svg { width: 20px; height: 20px; }
+.brand-mark svg { width: 32px; height: 32px; }
 .brand-name { font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; line-height: 1; }
 .brand-sub { font-size: 0.75rem; color: var(--muted); }
 .nav-link {
@@ -126,10 +126,15 @@ p { margin: 0; }
 .hero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; }
 .hero-text { display: flex; flex-direction: column; gap: 14px; justify-content: space-between; }
 .hero-text h1 { font-size: 2.3rem; }
-.countdown { display: flex; gap: 10px; flex-wrap: wrap; }
-.cd { background: var(--surface-2); border-radius: 8px; padding: 10px 14px; min-width: 76px; }
-.cd b { display: block; font-family: var(--f-mono); font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
-.cd span { font-size: 0.75rem; color: var(--muted); }
+.tagesziele { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tagesziel { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--surface-2); border: 1px solid transparent; border-radius: 8px; padding: 12px 14px; cursor: pointer; color: var(--text); }
+.tagesziel:hover { border-color: var(--line); }
+.tagesziel b { font-size: 1.6rem; line-height: 1.1; }
+.tagesziel b span { font-size: 0.95rem; color: var(--muted); }
+.tagesziel > span { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.tagesziel.ok { border-color: var(--ok); }
+.merksatz { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; border-left: 4px solid var(--red); }
+.merksatz p { font-size: 1.05rem; font-weight: 500; flex: 1 1 280px; }
 .ring-feld { display: flex; align-items: center; gap: 18px; }
 .ring { width: 120px; height: 120px; flex: none; }
 .ring .bahn { stroke: var(--surface-3); }
