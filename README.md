@@ -17,7 +17,7 @@ Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite
 - **Rechner:** GCS, Schockindex, qSOFA, NEWS2, Kinder-Notfalldosen
 - **Akronyme:** 40 Merkschemata und Abkürzungen (SINNHAFT, SAMPLERS, AVPU, xABCDE, 4 H/HITS, NRettDG, NPsychKG …) mit Karten und Quiz
 
-Der Fortschritt wird nur lokal im Browser gespeichert (`localStorage`).
+Der Fortschritt wird nur lokal im Browser gespeichert (`localStorage`). Die App lädt nichts von fremden Servern: Schriften liegen unter `fonts/` (SIL Open Font License), es gibt keine Tracker und keine Anmeldung.
 
 ## Als App aufs Handy (PWA)
 
