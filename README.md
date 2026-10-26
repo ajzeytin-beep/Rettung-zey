@@ -1,6 +1,6 @@
-# RS Plus Lernapp
+# Lernen mit Rettung ZTN
 
-**RS+ Lernapp Zey** – Lern-App für Rettungssanitäter Plus.
+**LernApp für RS+** – Lern-App für Rettungssanitäter Plus.
 Schwarzes Layout mit anthrazitfarbenen Feldern und roten Buttons. Die Startseite ist ein Dashboard.
 
 ## Funktionen

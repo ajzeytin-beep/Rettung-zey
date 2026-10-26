@@ -1,5 +1,5 @@
-// Offline-Cache für die RS+ Lernapp. Bei Änderungen VERSION erhöhen.
-const VERSION = 'rsplus-v2';
+// Offline-Cache für „Lernen mit Rettung ZTN“. Bei Änderungen VERSION erhöhen.
+const VERSION = 'rsplus-v3';
 const DATEIEN = [
   './', './index.html', './manifest.webmanifest', './css/app.css', './css/fonts.css', './js/app.js',
   './js/data/akronyme.js', './js/data/module.js', './js/data/fragen.js', './js/data/medikamente.js',

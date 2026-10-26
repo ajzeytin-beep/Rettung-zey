@@ -1,7 +1,7 @@
 {
-  "name": "RS+ Lernapp Zey",
-  "short_name": "RS+ Lernapp",
-  "description": "Lern-App für Rettungssanitäter Plus: Module, Quiz, Karteikarten, EKG, Medikamente, Fallbeispiele.",
+  "name": "Lernen mit Rettung ZTN",
+  "short_name": "Rettung ZTN",
+  "description": "LernApp für RS+: Module, Quiz, Karteikarten, EKG, Medikamente, Fallbeispiele.",
   "lang": "de",
   "start_url": "./index.html",
   "scope": "./",

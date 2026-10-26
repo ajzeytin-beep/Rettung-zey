@@ -37,7 +37,7 @@
     '<path fill="var(--red)" d="M7.2 8.4h1.6V10h1.6v1.6H8.8v1.6H7.2v-1.6H5.6V10h1.6z"/>' +
     '<circle cx="6.5" cy="16.8" r="2.2" fill="#fff"/><circle cx="17.5" cy="16.8" r="2.2" fill="#fff"/>' +
     '<circle cx="6.5" cy="16.8" r=".9" fill="var(--red)"/><circle cx="17.5" cy="16.8" r=".9" fill="var(--red)"/></svg>';
-  var MARKE = '<div class="brand"><div class="brand-mark">' + RTW + '</div><div class="brand-name">RS+ Lernapp Zey</div></div>';
+  var MARKE = '<div class="brand"><div class="brand-mark">' + RTW + '</div><div><div class="brand-name">Lernen mit Rettung ZTN</div><div class="brand-sub">LernApp für RS+</div></div></div>';
   var MERKSAETZE = [
     'Amiodaron: „Drei-Hundert nach dem Dritten“ – 300 mg nach dem 3. Schock, 150 mg nach dem 5.',
     'Kein ASS bei Dissektion, kein Nitro bei Hinterwand oder Potenzmitteln.',
