@@ -416,5 +416,184 @@ RS.faelle = [
       { q: 'Analgesie?', a: 'Nach SOP/NA: Metamizol 1 g als Kurzinfusion, ggf. Opioid; Butylscopolamin bei Gallenkolik eher als bei Nierenkolik. Re-Evaluation mit NRS.' },
       { q: 'Wann wird es dringend?', a: 'Fieber + Kolik (infizierte Harnstauung → Urosepsis), Einzelniere, Schockzeichen.' }
     ],
-    fehler: ['Aortenaneurysma nicht bedacht', 'Schmerz nicht re-evaluiert'] }
+    fehler: ['Aortenaneurysma nicht bedacht', 'Schmerz nicht re-evaluiert'] },
+  // ---------- N-KTW-Einsätze (Niedersachsen / Ostfriesland) ----------
+  { id: 'n1', titel: 'Sturz im Pflegeheim, 3 Uhr nachts', diagnose: 'Schenkelhalsfraktur (stabil)', kat: 'N-KTW',
+    lage: 'Alarmierung N-KTW: „Sturz im Pflegeheim, Hüftschmerz“. 88-jährige Bewohnerin liegt neben dem Bett, wach, orientiert, kann nicht aufstehen. Rechtes Bein verkürzt und außenrotiert. Nimmt ASS 100.',
+    werte: { AF: '18', SpO2: '95 %', HF: '92', RR: '145/80', BZ: '128 mg/dl', NRS: '7/10' },
+    schritte: [
+      { q: 'Passt der N-KTW zum Einsatz?', a: 'Ja, solange A, B, C und D stabil sind: akute Verletzung ohne Vitalbedrohung. Trotzdem vollständig nach xABCDE untersuchen.' },
+      { q: 'Warum ist sie gestürzt?', a: 'Sturzursache klären: Synkope? Schwindel? Hypoglykämie? Infekt? Rhythmusstörung? Medikamente (Blutdrucksenker, Schlafmittel)? Kopf angeschlagen? Seit wann liegt sie?' },
+      { q: 'Wann würdest du nachfordern?', a: 'RTW/NA bei Bewusstseinsstörung, Kreislaufinstabilität, Hinweis auf Synkope mit Rhythmusstörung, SHT unter Gerinnungshemmung mit Verschlechterung – und für eine Analgesie, die nicht in deiner Kompetenz liegt (NA oder Telenotarzt, je nach Region).' },
+      { q: 'Lagerung und Transport?', a: 'Vakuummatratze, Bein in vorgefundener Stellung polstern, pDMS vor und nach der Umlagerung, Wärmeerhalt. Schaufeltrage zum Umlagern.' },
+      { q: 'Was nimmst du mit?', a: 'Überleitungsbogen, Medikamentenplan, Patientenverfügung/Betreuer-Kontakt, Brille, Hörgerät. Ziel: Klinik mit Unfallchirurgie.' }
+    ],
+    fehler: ['Sturzursache nicht hinterfragt', 'Liegedauer nicht erfragt', 'Analgesie über die eigene Kompetenz hinaus'] },
+
+  { id: 'n2', titel: 'E-Bike-Sturz am Deich', diagnose: 'Distale Radiusfraktur', kat: 'N-KTW',
+    lage: 'Sommer, Radweg am Deich bei Norddeich. 71-jähriger Urlauber aus dem Ruhrgebiet ist auf dem E-Bike weggerutscht und auf die ausgestreckte linke Hand gefallen. Fahrradhelm getragen, Helm hat einen Riss. Er sagt: „Am Kopf ist nichts.“',
+    werte: { HF: '84', RR: '150/85', SpO2: '97 %', GCS: '15' },
+    schritte: [
+      { q: 'Worauf achtest du beim Unfallmechanismus?', a: 'E-Bike = höhere Geschwindigkeit als gedacht. Gerissener Helm = Kopfanprall! Kopf, HWS und Gerinnungshemmer abklären, Amnesie erfragen.' },
+      { q: 'Typischer Befund am Handgelenk?', a: '„Bajonett-“ bzw. Fourchette-Fehlstellung, Schwellung, Schmerz → distale Radiusfraktur (Typ Colles).' },
+      { q: 'Versorgung?', a: 'Schmuck/Uhr sofort ab (Schwellung!), pDMS, Schienung in vorgefundener Stellung, Hochlagern, Kühlen (nicht direkt auf die Haut).' },
+      { q: 'Wann wird es mehr als ein N-KTW-Einsatz?', a: 'Bewusstlosigkeit/Amnesie, Erbrechen, neurologische Ausfälle, Antikoagulation mit Kopfanprall, HWS-Schmerz mit Ausfällen, offene Fraktur mit starker Blutung.' },
+      { q: 'Besonderheit Urlauber?', a: 'Personalien, Versichertenkarte, Kontakt der Begleitperson, Unterkunft – und das E-Bike nicht vergessen (Begleiter/Polizei).' }
+    ],
+    fehler: ['Gerissenen Helm ignoriert', 'Ring nicht entfernt'] },
+
+  { id: 'n3', titel: 'Kohlfahrt mit Boßeln', diagnose: 'Kopfplatzwunde unter Alkohol', kat: 'N-KTW',
+    lage: 'Februar, Kohlfahrt im Landkreis Aurich. 34-jähriger Mann ist beim Boßeln in den nassen Graben gerutscht und mit dem Kopf gegen ein Brückengeländer gestoßen. Stark alkoholisiert, durchnässt, Platzwunde an der Stirn, will „weiterboßeln“.',
+    werte: { GCS: '14', HF: '96', RR: '135/85', SpO2: '96 %', Temp: '35,4 °C', BZ: '88 mg/dl' },
+    schritte: [
+      { q: 'Welche Gefahren siehst du?', a: 'SHT verschleiert durch Alkohol, Unterkühlung (nass, Februar), Aspiration, Hypoglykämie, weitere Verletzungen im Graben.' },
+      { q: 'Ist er einwilligungsfähig?', a: 'Eher nein: alkoholisiert, GCS 14. Mutmaßlicher Wille → Transport zur Abklärung. Ruhig erklären, Freunde einbinden; bei Aggression Abstand und Polizei.' },
+      { q: 'Versorgung?', a: 'Nasse Kleidung ausziehen, Wärmeerhalt, Wundversorgung (steriler Verband), HWS mitbeurteilen, BZ, Seitenlage bei Erbrechen.' },
+      { q: 'Wann nachfordern?', a: 'Bei GCS-Abfall, Anisokorie, Erbrechen, Krampf → RTW/NA. Ziel bei Kopfverletzung + Alkohol: Klinik mit CT.' }
+    ],
+    fehler: ['„Nur betrunken“ angenommen', 'Wärmeerhalt vergessen', 'Ohne Doku gehen lassen'] },
+
+  { id: 'n4', titel: 'Tritt im Melkstand', diagnose: 'Rippenfraktur – Verdacht Pneumothorax ausschließen', kat: 'N-KTW',
+    lage: 'Milchviehbetrieb im Rheiderland. 52-jähriger Landwirt wurde beim Melken von einer Kuh gegen die rechte Brustseite getreten. Schmerzen beim Atmen, sonst „alles gut“. Im Hintergrund läuft das Rührwerk der Güllegrube.',
+    werte: { AF: '22', SpO2: '95 %', HF: '98', RR: '140/90' },
+    schritte: [
+      { q: 'Eigenschutz auf dem Hof?', a: 'Tiere sichern lassen, nicht in den Stall zwischen die Tiere. Güllegrube/Güllekeller niemals betreten – Schwefelwasserstoff kann sofort tödlich sein. Patient ggf. herausbringen lassen.' },
+      { q: 'Was untersuchst du bei B genau?', a: 'Atemgeräusch beidseits, Thoraxbewegung, Krepitation/Hautemphysem, Prellmarken, AF, SpO₂ im Verlauf. Rippenserienfraktur? Instabiler Thorax?' },
+      { q: 'Was übersiehst du leicht?', a: 'Rechts unten liegt die Leber – Oberbauchschmerz, Abwehrspannung, Schockzeichen? Innere Blutung!' },
+      { q: 'Upgrade-Kriterien?', a: 'Fallende SpO₂, einseitig abgeschwächtes Atemgeräusch, zunehmende Atemnot, Hautemphysem, Schockzeichen → sofort RTW + NA.' },
+      { q: 'Lagerung und Transport?', a: 'Oberkörper hoch (wenn Kreislauf stabil), auf die verletzte Seite gestützt ist oft angenehmer, O₂ nach SpO₂. Klinik mit Unfallchirurgie und CT.' }
+    ],
+    fehler: ['Güllebereich unterschätzt', 'Leberverletzung nicht bedacht'] },
+
+  { id: 'n5', titel: 'Einweisung vom Hausarzt', diagnose: 'Pneumonie – NEWS2 gibt den Ausschlag', kat: 'N-KTW',
+    lage: 'Hausärztliche Einweisung „V. a. Pneumonie“, N-KTW alarmiert. 79-jährige Frau, seit 4 Tagen Husten und Fieber, heute schwach, isst kaum. Wirkt etwas langsamer als sonst, sagt die Tochter.',
+    werte: { AF: '23', SpO2: '93 %', HF: '108', RR: '102/60', Temp: '38,6 °C', Bewusstsein: 'neu verlangsamt' },
+    schritte: [
+      { q: 'Rechne den NEWS2.', a: 'AF 23 → 2, SpO₂ 93 → 2, Raumluft → 0, RR 102 → 1, HF 108 → 1, neu verlangsamt/verwirrt → 3, Temp 38,6 → 1 = 10 Punkte → hohes Risiko.' },
+      { q: 'Und qSOFA?', a: 'AF ≥ 22, Bewusstseinsänderung, RR ≤ 100? (102 knapp drüber) → 2/3 → Sepsisverdacht.' },
+      { q: 'Konsequenz für dich?', a: 'Die Einweisung klingt harmlos, die Patientin ist es nicht: RTW/NA nachfordern bzw. Rücksprache NA, O₂ nach Ziel, Voranmeldung „Verdacht Sepsis bei Pneumonie“.' },
+      { q: 'Was lernst du daraus?', a: 'Das Einsatzstichwort ist nur der Anfang. Eigene Untersuchung und Scores entscheiden, ob der N-KTW reicht.' }
+    ],
+    fehler: ['Einweisung ungeprüft übernommen', 'Neue Verwirrtheit nicht bewertet'] },
+
+  { id: 'n6', titel: 'Katheter läuft nicht', diagnose: 'Harnverhalt bei verstopftem Dauerkatheter', kat: 'N-KTW',
+    lage: 'Pflegedienst ruft: 83-jähriger Mann mit Dauerkatheter, seit Stunden kein Urin im Beutel, starke Unruhe, Unterbauch hart und druckschmerzhaft.',
+    werte: { HF: '102', RR: '165/90', SpO2: '96 %', Temp: '37,2 °C', BZ: '140 mg/dl' },
+    schritte: [
+      { q: 'Was prüfst du zuerst am Katheter?', a: 'Abgeknickt? Beutel über Blasenniveau? Verstopft (Blut, Kristalle)? Ballon disloziert? Nicht selbst spülen, wenn nicht in deiner Kompetenz.' },
+      { q: 'Warum ist der Patient unruhig und hyperton?', a: 'Volle Blase = starker Schmerz → Unruhe, RR- und HF-Anstieg. Bei dementen Patienten oft einziges Zeichen.' },
+      { q: 'Woran musst du zusätzlich denken?', a: 'Harnwegsinfekt/Urosepsis (Fieber, Schüttelfrost, Verwirrtheit, NEWS2), Blutung (Hämaturie unter Antikoagulation).' },
+      { q: 'Transportziel?', a: 'Klinik mit Urologie (bzw. nach Absprache Leitstelle). Bei Fieber + Hypotonie: Sepsisverdacht → RTW/NA.' }
+    ],
+    fehler: ['Unruhe als Demenz abgetan', 'Sepsiszeichen nicht gesucht'] },
+
+  { id: 'n7', titel: 'Nasenbluten hört nicht auf', diagnose: 'Epistaxis unter Antikoagulation', kat: 'N-KTW',
+    lage: '76-jähriger Mann, seit 45 Minuten Nasenbluten, mehrere Küchentücher durchgeblutet. Nimmt Marcumar und Blutdrucktabletten. Sitzt mit zurückgelegtem Kopf auf dem Sofa.',
+    werte: { HF: '92', RR: '185/100', SpO2: '96 %' },
+    schritte: [
+      { q: 'Was korrigierst du sofort?', a: 'Kopf nach **vorne** beugen (nicht nach hinten – sonst schluckt er Blut → Erbrechen, Aspiration).' },
+      { q: 'Wie stillst du die Blutung?', a: 'Nasenflügel mindestens 10–15 Minuten fest zusammendrücken, kalter Umschlag in den Nacken, Blut ausspucken lassen.' },
+      { q: 'Wie beurteilst du den Blutverlust?', a: 'Menge schätzen, Schockzeichen (Puls, Haut, Schwindel beim Aufrichten), verschlucktes Blut (Erbrechen dunkel). Hoher RR ist meist Folge von Stress, nicht primär senken.' },
+      { q: 'Wann mehr als N-KTW?', a: 'Schockzeichen, Bewusstseinsstörung, massive Blutung aus dem Rachen trotz Kompression → RTW/NA. Ziel sonst: HNO-Klinik.' }
+    ],
+    fehler: ['Kopf in den Nacken', 'Zu kurz komprimiert'] },
+
+  { id: 'n8', titel: 'Hitzewelle im Altenheim', diagnose: 'Exsikkose mit orthostatischer Hypotonie', kat: 'N-KTW',
+    lage: 'Juli, 32 °C. 86-jährige Frau ist beim Aufstehen kollabiert, jetzt wach im Bett. Seit Tagen wenig getrunken, nimmt Wassertabletten (Furosemid). Zunge trocken, stehende Hautfalten.',
+    werte: { HF: '108', RR: '98/60 (liegend)', SpO2: '96 %', BZ: '160 mg/dl', Temp: '37,6 °C' },
+    schritte: [
+      { q: 'Ursache des Kollapses?', a: 'Volumenmangel (Hitze, wenig Trinken, Diuretikum) → orthostatische Hypotonie. Differenzial: Rhythmusstörung, Infekt, Blutung.' },
+      { q: 'Was misst du zusätzlich?', a: '12-Kanal-EKG, BZ, Temperatur, Schellong-ähnlich: RR/Puls liegend vs. sitzend nur vorsichtig.' },
+      { q: 'Maßnahmen?', a: 'Flach lagern, Beine hoch, kühle Umgebung, Trinken nur wenn wach und schluckfähig. Zugang/Infusion nur nach Kompetenz/Leitlinie.' },
+      { q: 'Wann ist es kein N-KTW-Patient mehr?', a: 'RR weiter fallend, Bewusstseinsstörung, neue Verwirrtheit, Rhythmusstörung, Fieber mit Sepsiszeichen → RTW/NA.' }
+    ],
+    fehler: ['Patientin zum Gehen aufgefordert', 'Diuretikum nicht erfragt'] },
+
+  { id: 'n9', titel: 'Gallimarkt in Leer', diagnose: 'Alkoholintoxikation – an K.-o.-Tropfen denken', kat: 'N-KTW',
+    lage: 'Oktober, Gallimarkt Leer, 23 Uhr. 19-jährige Frau sitzt am Rand eines Zelts, Freundinnen sagen: „Sie hatte nur zwei Getränke, dann war sie plötzlich weg.“ Reagiert auf lautes Ansprechen.',
+    werte: { AVPU: 'V', AF: '14', SpO2: '96 %', HF: '64', RR: '110/70', Temp: '35,9 °C', BZ: '92 mg/dl' },
+    schritte: [
+      { q: 'Was fällt an der Geschichte auf?', a: 'Wenig Alkohol, plötzlicher Bewusstseinsverlust → Verdacht auf K.-o.-Tropfen (z. B. GHB). Ernst nehmen!' },
+      { q: 'Versorgung?', a: 'Atemweg, Seitenlage bei Erbrechen, Absaugbereitschaft, Wärmeerhalt (Oktobernacht), BZ, Monitoring. Engmaschig AVPU – GHB kann schnell zu U und Atemdepression führen.' },
+      { q: 'Wann nachfordern?', a: 'Bei P oder U, AF < 10, SpO₂-Abfall, Krampf → RTW/NA.' },
+      { q: 'Was noch?', a: 'Freundinnen als Zeuginnen, Verdacht in der Übergabe klar benennen (Urin-/Blutprobe früh!), Polizei nach Rücksprache mit Patientin bzw. bei Straftatverdacht. Schutz vor Gaffern, Würde wahren.' }
+    ],
+    fehler: ['„Nur betrunken“ abgetan', 'Verdacht nicht übergeben'] },
+
+  { id: 'n10', titel: 'Umgeknickt am Fähranleger', diagnose: 'Sprunggelenksverletzung bei Urlauberin', kat: 'N-KTW',
+    lage: 'Fähranleger Norddeich. Niederländische Urlauberin, 45 Jahre, ist mit dem Rollkoffer von der Kante gerutscht und umgeknickt. Spricht nur wenig Deutsch, Englisch geht. Die Fähre zur Insel legt gleich ab.',
+    werte: { HF: '90', RR: '130/80', SpO2: '98 %', NRS: '6/10' },
+    schritte: [
+      { q: 'Wie kommunizierst du?', a: 'Langsam, einfach, auf Englisch oder mit Übersetzungs-App; zeigen statt erklären. Begleitperson nur, wenn sie zuverlässig übersetzt.' },
+      { q: 'Wie unterscheidest du grob Verstauchung und Fraktur?', a: 'Belastung unmöglich, Druckschmerz an den Knöcheln (Außen-/Innenknöchel-Hinterkante), Fehlstellung → Frakturverdacht → Röntgen. (Ottawa-Regeln als Orientierung.)' },
+      { q: 'Versorgung?', a: 'PECH: Pause, Eis (nicht direkt), Compression locker, Hochlagern. pDMS, Schienung, Schuh ausziehen bevor es zuschwillt.' },
+      { q: 'Und die Fähre?', a: 'Ihre Entscheidung, aber aufklären: auf der Insel ist die Versorgung eingeschränkt. Gepäck und Begleitung organisieren lassen, Versicherungsdaten (EHIC) aufnehmen.' }
+    ],
+    fehler: ['Schuh drangelassen', 'Aufklärung wegen Sprachbarriere ausgelassen'] },
+
+  { id: 'n11', titel: 'Vom Pferd gefallen', diagnose: 'Schlüsselbeinfraktur – Bauchverletzung ausschließen', kat: 'N-KTW',
+    lage: 'Reitstall bei Wittmund. 12-jähriges Mädchen ist beim Springen vom Pferd gestürzt, auf die rechte Schulter gefallen, das Pferd ist danach noch über sie gestiegen. Helm getragen, weint, hält den rechten Arm.',
+    werte: { HF: '118', RR: '105/65', SpO2: '98 %', AF: '22' },
+    schritte: [
+      { q: 'Was ist am Mechanismus kritisch?', a: 'Sturz aus ca. 2–3 m Höhe plus mögliches Trittrauma durch das Pferd → Bauch- und Thoraxverletzung möglich (Milz links, Leber rechts).' },
+      { q: 'Was untersuchst du gezielt?', a: 'Bauch: Prellmarken, Hufabdruck, Abwehrspannung, Schulterschmerz links (Milz!). Thorax, Becken, Wirbelsäule. Kinder kompensieren lange – Tachykardie ernst nehmen.' },
+      { q: 'Schulter?', a: 'Stufe am Schlüsselbein → Klavikulafraktur: Arm in Schonhaltung, Dreiecktuch/Gilchrist, pDMS.' },
+      { q: 'Reicht der N-KTW?', a: 'Nur wenn Bauch und Kreislauf unauffällig sind. HF 118 bei einem 12-jährigen mit Trittverdacht → eher RTW/NA nachfordern, Kinderchirurgie/Traumazentrum. Eltern informieren lassen.' }
+    ],
+    fehler: ['Nur die Schulter versorgt', 'Tachykardie mit Angst erklärt'] },
+
+  { id: 'n12', titel: '„Rückenschmerzen“', diagnose: 'Upgrade: STEMI hinter harmlosem Stichwort', kat: 'N-KTW',
+    lage: 'N-KTW-Alarm: „Rückenschmerzen seit dem Morgen“. 61-jähriger Mann, Diabetiker, sitzt blass am Küchentisch, Schmerz zwischen den Schulterblättern, etwas Übelkeit. „Hab mich wohl verhoben.“',
+    werte: { HF: '58', RR: '105/70', SpO2: '95 %', AF: '20', BZ: '210 mg/dl' },
+    schritte: [
+      { q: 'Was macht dich stutzig?', a: 'Blass, Übelkeit, Diabetiker (atypische Symptome!), Bradykardie, grenzwertiger RR – kein typischer „Hexenschuss“.' },
+      { q: 'Welche Diagnostik sofort?', a: '12-Kanal-EKG innerhalb von 10 Minuten, RR beidseits (Dissektion?), Monitoring, Defi bereit.' },
+      { q: 'Das EKG zeigt ST-Hebungen in II, III, aVF. Was jetzt?', a: 'STEMI (Hinterwand) → sofort RTW + NA nachfordern, Patient nicht laufen lassen, HKL voranmelden, kein Nitro (Hinterwand, RR grenzwertig).' },
+      { q: 'Was ist die wichtigste Lehre für den N-KTW?', a: 'Das Einsatzstichwort ist eine Vermutung der Leitstelle. Du bist Einsatzführer: Wenn der Patient kritischer ist als gemeldet, sofort nachfordern („Upgrade“).' }
+    ],
+    fehler: ['Stichwort ungeprüft übernommen', '12-Kanal-EKG nicht geschrieben', 'Patient zum Fahrzeug laufen lassen'] },
+
+  { id: 'n13', titel: 'Kollaps beim Teetied', diagnose: 'Vasovagale Synkope – Ausschlussdiagnose', kat: 'N-KTW',
+    lage: '27-jährige Frau ist beim Familienkaffee in der warmen Stube nach langem Stehen kurz umgekippt, war ca. 20 Sekunden weg, jetzt wieder klar. Vorher Schwarzwerden vor den Augen, Schwitzen.',
+    werte: { HF: '72', RR: '115/70', SpO2: '99 %', BZ: '95 mg/dl' },
+    schritte: [
+      { q: 'Was spricht für vasovagal?', a: 'Auslöser (Wärme, langes Stehen), Prodromi (Schwarzwerden, Schwitzen, Übelkeit), kurze Dauer, schnelle vollständige Erholung.' },
+      { q: 'Was musst du trotzdem ausschließen?', a: 'Rhythmusstörung (12-Kanal: QT, Präexzitation, Brugada), Synkope bei Belastung, Brustschmerz/Atemnot (LAE), Hypoglykämie, **Schwangerschaft** (Extrauteringravidität!), Krampfanfall (Zungenbiss, Einnässen), Verletzungen.' },
+      { q: 'Red Flags → mehr als N-KTW?', a: 'Synkope beim Sport/im Liegen, ohne Vorzeichen, mit Brustschmerz, Herzrasen, familiärer plötzlicher Herztod, pathologisches EKG → RTW/NA.' },
+      { q: 'Sie will nicht mit. Was tust du?', a: 'Ist alles unauffällig und sie einwilligungsfähig: aufklären, Hausarzt/116117 empfehlen, nicht allein lassen, dokumentieren mit Unterschrift. Bei Zweifel: Rücksprache NA.' }
+    ],
+    fehler: ['Schwangerschaft nicht erfragt', 'Kein 12-Kanal-EKG'] },
+
+  { id: 'n14', titel: 'Zucker im Keller', diagnose: 'Hypoglykämie unter Sulfonylharnstoff (wach)', kat: 'N-KTW',
+    lage: '80-jähriger Mann im Betreuten Wohnen, schwitzig, zittrig, etwas verwirrt, aber wach und schluckt sicher. Hat heute Morgen seine Diabetestabletten (Glimepirid) genommen, aber kaum gefrühstückt.',
+    werte: { BZ: '48 mg/dl', GCS: '14', HF: '96', RR: '150/85', SpO2: '96 %' },
+    schritte: [
+      { q: 'Darf er etwas trinken/essen?', a: 'Ja – wach und sicher schluckend: Traubenzucker oder gezuckerten Saft, danach langsam wirkende Kohlenhydrate (Brot). BZ nach 15 Minuten kontrollieren.' },
+      { q: 'Warum ist Glimepirid wichtig?', a: 'Sulfonylharnstoffe wirken lange → erneute, verzögerte Unterzuckerung über Stunden möglich → stationäre Überwachung empfehlen.' },
+      { q: 'Wann nachfordern?', a: 'Bewusstseinsstörung (nichts per os mehr!), Krampf, BZ steigt nicht → NA/Leitlinie für G40 i.v.' },
+      { q: 'Er will zu Hause bleiben.', a: 'Aufklären über Rückfallgefahr, Einwilligungsfähigkeit prüfen (erst nach BZ-Normalisierung!), Hausarzt/Angehörige, nicht allein lassen, dokumentieren.' }
+    ],
+    fehler: ['Lange Wirkdauer des Medikaments übersehen', 'Einwilligungsfähigkeit schon bei BZ 48 beurteilt'] },
+
+  { id: 'n15', titel: 'Hausnotruf: liegt seit gestern', diagnose: 'Liegetrauma bei Seniorin', kat: 'N-KTW',
+    lage: 'Hausnotruf, Dorf bei Hesel. 91-jährige Frau, alleinlebend, schwerhörig, spricht vor allem Plattdeutsch. Liegt seit gestern Abend auf dem Badezimmerboden. Wach, friert, Durst, Druckstellen an Hüfte und Schulter.',
+    werte: { HF: '104', RR: '105/60', SpO2: '94 %', Temp: '35,2 °C', BZ: '110 mg/dl' },
+    schritte: [
+      { q: 'Wie kommunizierst du?', a: 'Hörgerät einsetzen, auf Augenhöhe, langsam und deutlich; Plattdeutsch sprechende Kollegen oder Nachbarn helfen oft. Respekt und Geduld.' },
+      { q: 'Welche Folgen hat langes Liegen?', a: 'Unterkühlung, Exsikkose, Druckschäden/Dekubitus, Muskelzerfall (Rhabdomyolyse → Nierenversagen, Kalium!), Pneumonie, Thrombose.' },
+      { q: 'Und warum ist sie gestürzt?', a: 'Ursache suchen: Synkope, Schlaganfall (BE-FAST!), Infekt, Medikamente, Fraktur (Hüfte?).' },
+      { q: 'Maßnahmen und Transport?', a: 'Vorsichtig aufwärmen (Decken, warmer Raum), xABCDE, EKG (Hyperkaliämie?), Vakuummatratze bei Hüftverdacht. Klinik – fast immer stationär. Bei Instabilität RTW/NA.' }
+    ],
+    fehler: ['Liegedauer nicht erfragt', 'Nur auf den Sturz fokussiert'] },
+
+  { id: 'n16', titel: 'Schnitt auf dem Krabbenkutter', diagnose: 'Handverletzung mit Fingerkuppen-Amputation', kat: 'N-KTW',
+    lage: 'Hafen Greetsiel. 38-jähriger Fischer hat sich beim Netzflicken mit dem Messer in die linke Hand geschnitten, die Kuppe des Zeigefingers fehlt teilweise. Blutet, Hand im Lappen gewickelt.',
+    werte: { HF: '96', RR: '140/85', SpO2: '98 %' },
+    schritte: [
+      { q: 'Blutungskontrolle?', a: 'Druckverband und Hochlagern reichen meist. Tourniquet nur bei lebensbedrohlicher, anders nicht stillbarer Blutung.' },
+      { q: 'Wie versorgst du das Amputat?', a: 'Suchen lassen, trocken in sterile Kompresse, in Beutel, diesen in einen zweiten Beutel mit Eiswasser – nie direkt auf Eis, nicht in Wasser legen.' },
+      { q: 'Was prüfst du an der Hand?', a: 'pDMS an jedem Finger: Durchblutung, Beweglichkeit (Sehnen), Gefühl (Nerven). Schmuck/Ringe ab.' },
+      { q: 'Zielklinik?', a: 'Klinik mit Handchirurgie (Replantation möglich?) – Absprache mit Leitstelle. Tetanusschutz erfragen.' }
+    ],
+    fehler: ['Amputat direkt auf Eis', 'Sensibilität nicht geprüft'] }
 ];

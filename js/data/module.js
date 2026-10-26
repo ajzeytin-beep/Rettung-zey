@@ -16,6 +16,24 @@ RS.module = [
         'Kritischer Patient = **früh nachfordern** (RTW, Notarzt). Lieber einmal zu früh als zu spät.',
         'Maßnahmen und Medikamente nur im Rahmen deiner **Kompetenz und der RS-Plus-Leitlinie** (Aurich, Leer, Wittmund) oder nach Freigabe durch den Notarzt.'
       ]},
+      { h: 'Einsatzspektrum des N-KTW in Niedersachsen', p: [
+        'Der Notfall-KTW ist für Patienten mit **akuter Erkrankung oder Verletzung ohne Bedrohung der Vitalfunktionen** gedacht, die zeitnah versorgt und meist in eine Klinik gebracht werden müssen. Er fährt in der Regel **ohne Sonderrechte**.',
+        'Ziel: RTW und Notarzt für zeitkritische Notfälle freihalten.',
+        'Besetzung laut NRettDG-Änderung: mindestens ein Rettungssanitäter mit Einsatzerfahrung (Richtwert ≥ 100 Notfalleinsätze) und Zusatzqualifikation **RS Plus** als Einsatzführer. Details regelt der Träger.',
+        'Typische Einsätze: Stürze älterer Menschen (Hüfte, Handgelenk, Kopfplatzwunde ohne Bewusstseinsstörung), geschlossene Extremitätenverletzungen, Schnittwunden, Einweisungen vom Hausarzt, Infekte, Harnverhalt/Katheterprobleme, Nasenbluten, Exsikkose, Bauchschmerz ohne Schock, Synkope mit rascher Erholung, leichte Intoxikationen, Transportverweigerungen.',
+        'In Ostfriesland disponiert die **Kooperative Regionalleitstelle Ostfriesland (KRLO)** in Wittmund für die Landkreise Aurich, Leer, Wittmund und die Stadt Emden. Regionale Besonderheiten: Urlauber und Radtouristen, Fähr- und Inselverkehr, Landwirtschaft, Häfen, Volksfeste (z. B. Gallimarkt), Kohlfahrten, viele ältere Menschen in ländlichen Gebieten mit langen Anfahrten.'
+      ]},
+      { h: 'Upgrade: wann der N-KTW nicht reicht', p: [
+        'Das Einsatzstichwort ist eine **Vermutung der Leitstelle** – deine Untersuchung entscheidet.',
+        'Sofort RTW (und ggf. NA) nachfordern bei: Problem in **A, B, C oder D**, Schockzeichen, neu aufgetretener Bewusstseinsstörung, ST-Hebung, Instabilitätszeichen bei Rhythmusstörungen, Sepsisverdacht, NEWS2 ≥ 5 (bzw. 3 in einem Einzelwert), gefährlichem Mechanismus (Sturz > 3 m, Tritt in den Bauch, Hochrasanz).',
+        'Auch nachfordern, wenn **Maßnahmen außerhalb deiner Kompetenz** nötig sind (z. B. stärkere Analgesie, i.v.-Medikamente) – je nach Region über Notarzt oder Telenotarzt.',
+        'Patienten bei Zweifel **nicht laufen lassen** und am Monitor behalten, bis das höherwertige Rettungsmittel da ist.'
+      ]},
+      { h: 'Transportziele und Alternativen', p: [
+        'Klinik passend zur Verdachtsdiagnose: Unfallchirurgie, Urologie, HNO, Handchirurgie, Kinderklinik, Stroke Unit, HKL.',
+        'Kein Transport nötig? Hausarzt, kassenärztlicher Bereitschaftsdienst **116 117** – aber nur nach gründlicher Untersuchung, Aufklärung und Dokumentation (ggf. Rücksprache NA).',
+        'Unterlagen mitnehmen: Medikamentenplan, Arztbriefe, Überleitungsbogen, Patientenverfügung, Hilfsmittel (Brille, Hörgerät, Gebiss).'
+      ]},
       { h: 'Notarztindikationen (Auswahl)', p: [
         'Bewusstlosigkeit oder relevante **Bewusstseinsstörung** (ab AVPU **P**)',
         '**Schwere Atemnot**, Atemstillstand, SpO₂ deutlich erniedrigt',
@@ -51,6 +69,10 @@ RS.module = [
       ]}
     ],
     karten: [
+      ['Für welche Patienten ist der N-KTW gedacht?', 'Akut erkrankte oder verletzte Patienten ohne Bedrohung der Vitalfunktionen – meist ohne Sonderrechte.'],
+      ['Wann forderst du als N-KTW-Einsatzführer nach?', 'Bei A-, B-, C- oder D-Problem, Schock, neuer Bewusstseinsstörung, ST-Hebung, Sepsisverdacht, NEWS2 ≥ 5, gefährlichem Mechanismus oder Maßnahmen außerhalb deiner Kompetenz.'],
+      ['Welche Leitstelle disponiert in Ostfriesland?', 'Die Kooperative Regionalleitstelle Ostfriesland (KRLO) in Wittmund – für Aurich, Leer, Wittmund und Emden.'],
+      ['Telefonnummer des ärztlichen Bereitschaftsdienstes?', '116 117.'],
       ['Wofür steht SINNHAFT?', 'Sicherstellen – Identifikation – Notfallereignis – Notfallpriorität (ABCDE) – Handlung – Anamnese – Fazit – Teamfrage'],
       ['Ab welcher AVPU-Stufe ist der Patient kritisch?', 'Ab **P** (reagiert nur auf Schmerz): Atemweg sichern, Notarzt nachfordern.'],
       ['Was gehört bei einer Transportverweigerung in die Doku?', 'Einwilligungsfähigkeit, Aufklärung inkl. möglichem Tod, Notarzt nachgefordert, Unterschrift des Patienten + Zeuge.'],
